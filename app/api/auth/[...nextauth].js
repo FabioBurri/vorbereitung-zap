@@ -1,12 +1,24 @@
 import NextAuth from "next-auth";
-import Providers from "next-auth/providers";
+import GoogleProvider from "next-auth/providers/google"; // Import Google Provider
 
 export default NextAuth({
   providers: [
-    Providers.Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  database: process.env.DATABASE_URL,
+  callbacks: {
+    async session({ session, token }) {
+      session.user.id = token.id; // Add custom fields to session
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id; // Add custom fields to JWT
+      }
+      return token;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET, // You will need to set this up
 });
