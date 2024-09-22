@@ -8,13 +8,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-800 p-4">
-      <ul className="flex justify-between items-center">
-        {}
-        <li className="text-white">
-          <Link href="/">Home</Link>
-        </li>
-
-        {}
+      <ul className="flex justify-end items-center space-x-8">
         {session ? (
           <li className="text-white">
             <button onClick={() => signOut()}>Logout</button>
@@ -23,10 +17,12 @@ const Navbar = () => {
           <>
             {}
             <li className="text-white">
-              <Link href="/login">Login</Link>
+              <Link href="/register">Registrieren</Link>
             </li>
-            <li className="text-white">
-              <Link href="/register">Register</Link>
+            <li>
+              <Link href="/login" className="bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-colors">
+                  Login
+                </Link>
             </li>
           </>
         )}

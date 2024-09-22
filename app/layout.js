@@ -1,6 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
+import Navbar from "./components/Navbar";
+import SessionWrapper from "./components/SessionWrapper";
 
 export const metadata = {
   title: 'Vorbereitung ZAP',
@@ -20,10 +22,13 @@ const geistMono = localFont({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="de">
-      <body>
-        <ClientLayout>{children}</ClientLayout>
-      </body>
-    </html>
+    <SessionWrapper>
+      <html lang="de">
+        <body className={geistSans.variable}>
+          <Navbar />
+          {children}
+        </body>
+      </html>
+    </SessionWrapper>
   );
 }
