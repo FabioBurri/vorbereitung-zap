@@ -1,13 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+  const router = useRouter();
 
   const getErrorMessage = (error) => {
     switch (error) {
@@ -15,9 +21,30 @@ export default function LoginPage() {
         return 'Die Anmeldung wurde abgebrochen.';
       case 'CredentialsSignin':
         return 'Anmeldeinformationen sind ungültig.';
+      case 'InvalidCredentials':
+        return 'Ungültige E-Mail oder Passwort.';
       default:
         return 'Ein unbekannter Fehler ist aufgetreten.';
     }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.push('/dashboard');
+    }
+    setLoading(false);
   };
 
   return (
@@ -30,9 +57,36 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Anmelden mit Google */}
+      {/* E-Mail Login */}
+      <form className="flex flex-col w-80 mb-4" onSubmit={handleLogin}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="E-Mail-Adresse"
+          className="mb-4 px-4 py-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Passwort"
+          className="mb-4 px-4 py-2 border rounded"
+          required
+        />
+        <button
+          type="submit"
+          className="bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition"
+          disabled={loading}
+        >
+          {loading ? 'Anmelden...' : 'Anmelden mit E-Mail'}
+        </button>
+      </form>
+
+      {/* Login mit Google */}
       <button 
-        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
+        className="flex items-center bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition mb-4"
         onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
       >
         <div className="bg-white p-1 rounded-full mr-2">
@@ -46,9 +100,9 @@ export default function LoginPage() {
         Anmelden mit Google
       </button>
 
-      {/* Anmelden mit GitHub */}
+      {/* Login mit GitHub */}
       <button 
-        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
+        className="flex items-center bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition mb-4"
         onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
       >
         <div className="bg-white p-1 rounded-full mr-2">
@@ -60,22 +114,6 @@ export default function LoginPage() {
           />
         </div>
         Anmelden mit Github
-      </button>
-
-      {/* Anmelden mit E-Mail */}
-      <button 
-        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-        onClick={() => signIn('email', { callbackUrl: '/dashboard' })}
-      >
-        <div className="bg-white p-1 rounded-full mr-2">
-          <Image 
-            src="https://static.vecteezy.com/system/resources/previews/021/454/517/non_2x/email-confirmation-app-icon-email-icon-free-png.png"
-            alt="E-Mail Logo"
-            width={20}
-            height={20}
-          />
-        </div>
-        Anmelden mit E-Mail
       </button>
 
       <p className="mt-4">
