@@ -18,12 +18,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-gray-800 w-full p-4 fixed top-0 z-10 flex items-center">
+    <nav className="bg-[#003f56] w-full h-16 p-4 fixed top-0 z-10 flex items-center">
       {/* Logo */}
       <div className="flex-1">
         <Link href={session ? '/dashboard' : '/'}>
           <Image 
-            src="ZAP_logo_transparent.svg"
+            src="/ZAP_logo_transparent.svg"
             alt="Logo ZAP"
             width={70}
             height={50}
@@ -32,7 +32,7 @@ const Navbar = () => {
         </Link>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Links */}
       <ul className="flex justify-end items-center space-x-8">
         {session ? (
           <>
@@ -55,13 +55,12 @@ const Navbar = () => {
               <Link href="/profil">Profil</Link>
             </li>
             <li>
-              <Link 
-                href="/"
+              <button
                 onClick={handleLogout}
-                className="bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-colors text-base font-normal"
+                className="bg-white text-[#003f56] px-4 py-2 rounded hover:bg-gray-200 transition-colors text-base font-normal"
               >
                 Logout
-              </Link>
+              </button>
             </li>
           </>
         ) : (
@@ -70,7 +69,7 @@ const Navbar = () => {
               <Link href="/register">Registrieren</Link>
             </li>
             <li>
-              <Link href="/login" className="bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-colors text-base font-normal">
+              <Link href="/login" className="bg-white text-[#003f56] px-4 py-2 rounded hover:bg-gray-200 transition-colors text-base font-normal">
                 Login
               </Link>
             </li>

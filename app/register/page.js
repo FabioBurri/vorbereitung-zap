@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -17,13 +18,19 @@ export default function RegisterPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/login`,
+      },
     });
 
     if (error) {
       setError('Fehler bei der Registrierung: ' + error.message);
     } else {
       setMessage('Registrierung erfolgreich! Bitte überprüfe dein E-Mail-Postfach.');
-      router.push('/login');
+
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
     }
   };
 
@@ -61,11 +68,19 @@ export default function RegisterPage() {
         />
         <button
           type="submit"
-          className="bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition"
+          className="bg-[#003f56] text-white px-4 py-2 rounded hover:bg-[#004f66] transition"
         >
           Registrieren
         </button>
       </form>
+
+      <p className="mt-4">
+        Du hast bereits einen Account? Logge dich{' '}
+        <Link href="/login" className="text-blue-500 hover:underline">
+          hier
+        </Link>
+        {' '}ein.
+      </p>
     </div>
   );
 }

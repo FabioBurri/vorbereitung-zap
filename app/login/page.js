@@ -58,7 +58,7 @@ export default function LoginPage() {
       )}
 
       {/* E-Mail Login */}
-      <form className="flex flex-col w-80 mb-4" onSubmit={handleLogin}>
+      <form className="flex flex-col w-80 mb-8" onSubmit={handleLogin}>
         <input
           type="email"
           value={email}
@@ -77,7 +77,7 @@ export default function LoginPage() {
         />
         <button
           type="submit"
-          className="bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition"
+          className="bg-[#003f56] text-white px-4 py-2 rounded hover:bg-[#004f66] transition"
           disabled={loading}
         >
           {loading ? 'Anmelden...' : 'Anmelden mit E-Mail'}
@@ -86,7 +86,7 @@ export default function LoginPage() {
 
       {/* Login mit Google */}
       <button 
-        className="flex items-center bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition mb-4"
+        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
         onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
       >
         <div className="bg-white p-1 rounded-full mr-2">
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
       {/* Login mit GitHub */}
       <button 
-        className="flex items-center bg-[rgb(31,41,55)] text-white px-4 py-2 rounded hover:bg-[rgb(75,85,99)] transition mb-4"
+        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
         onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
       >
         <div className="bg-white p-1 rounded-full mr-2">
@@ -121,7 +121,7 @@ export default function LoginPage() {
         <Link href="/register" className="text-blue-500 hover:underline">
           hier
         </Link>
-        .
+        {' '}ein.
       </p>
     </div>
   );
