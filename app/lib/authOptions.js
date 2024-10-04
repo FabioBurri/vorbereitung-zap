@@ -29,7 +29,7 @@ export const authOptions = {
         if (error || !data.user) {
           throw new Error('InvalidCredentials');
         }
-    
+
         return { id: data.user.id, email: data.user.email };
       },
     }),
@@ -38,4 +38,19 @@ export const authOptions = {
     signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
+
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.user_id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token?.user_id) {
+        session.user.id = token.user_id;
+      }
+      return session;
+    },
+  },
 };

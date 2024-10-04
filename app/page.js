@@ -58,11 +58,16 @@ export default function HomePage() {
             </li>
           </ul>
 
-          {/* Button */}
-          <div className="flex justify-start">
+          {/* Buttons */}
+          <div className="flex space-x-4">
             <Link href="/register">
-              <span className="bg-[#003f56] rounded hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
-                Jetzt Registrieren
+              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+                Jetzt registrieren
+              </span>
+            </Link>
+            <Link href="/login">
+              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+                Einloggen
               </span>
             </Link>
           </div>

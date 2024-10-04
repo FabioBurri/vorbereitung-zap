@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '../lib/supabaseClient';
 
@@ -10,48 +10,112 @@ export default function ProfilePage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [newProfilePic, setNewProfilePic] = useState(null);
-  const defaultProfilePicture = "https://w7.pngwing.com/pngs/981/645/png-transparent-default-profile-united-states-computer-icons-desktop-free-high-quality-person-icon-miscellaneous-silhouette-symbol-thumbnail.png";
+  const [successMessage, setSuccessMessage] = useState('');
+  const defaultProfilePicture = "https://cdn.pixabay.com/photo/2021/07/25/08/03/account-6491185_640.png";
+
+  const userId = session?.user?.id;
 
   const titleName = firstName || session?.user?.email || 'User';
 
-  const handleSave = async () => {
-    const userData = {
-      firstName,
-      lastName,
-      phone,
-    };
+  useEffect(() => {
+    if (userId) {
+      const fetchProfile = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, phone, avatar_url')
+          .eq('id', userId)
+          .single();
 
-    // Save profile data to Supabase
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(userData)
-      .eq('email', session?.user?.email);
+        if (data) {
+          setFirstName(data.first_name || '');
+          setLastName(data.last_name || '');
+          setPhone(data.phone || '');
+          if (data.avatar_url) {
+            const { data: publicUrlData } = supabase
+              .storage
+              .from('avatars')
+              .getPublicUrl(data.avatar_url);
+            
+            setAvatarUrl(`${publicUrlData.publicUrl}?t=${new Date().getTime()}`);
+          }
+        }
 
-    if (error) {
-      console.log('Error updating profile:', error.message);
-    } else {
-      console.log('Profile updated successfully:', data);
+        if (error) {
+          console.error('Error fetching profile:', error.message);
+        }
+      };
+
+      fetchProfile();
     }
+  }, [userId]);
 
-    // If a new profile picture is uploaded, handle the upload logic
-    if (newProfilePic) {
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    setNewProfilePic(file);
+    setSuccessMessage('');
+
+    if (file && userId) {
       const { data: imageData, error: imageError } = await supabase
         .storage
-        .from('avatars') // Assuming you're using a 'avatars' storage bucket in Supabase
-        .upload(`public/${session?.user?.email}`, newProfilePic);
+        .from('avatars')
+        .upload(`public/${userId}`, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
 
       if (imageError) {
         console.log('Error uploading image:', imageError.message);
       } else {
         console.log('Image uploaded successfully:', imageData);
+
+        const { data: updateData, error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: imageData.path })
+          .eq('id', userId);
+
+        if (updateError) {
+          console.log('Error updating profile with avatar URL:', updateError.message);
+        } else {
+          const { data: publicUrlData } = supabase
+            .storage
+            .from('avatars')
+            .getPublicUrl(imageData.path);
+          
+          setAvatarUrl(`${publicUrlData.publicUrl}?t=${new Date().getTime()}`);
+        }
       }
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setNewProfilePic(file);
+  const handleSave = async () => {
+    if (!userId) {
+      console.error("User ID is undefined. Cannot update profile.");
+      return;
+    }
+
+    const userData = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+    };
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert({ ...userData, id: userId })
+      .eq('id', userId);
+
+    if (error) {
+      console.log('Error updating profile:', error.message);
+    } else {
+      setSuccessMessage('Das Speichern war erfolgreich.');
+    }
+  };
+
+  const handleInputChange = (setter) => (e) => {
+    setter(e.target.value);
+    setSuccessMessage('');
   };
 
   return (
@@ -74,15 +138,13 @@ export default function ProfilePage() {
 
       {/* Content */}
       <div className="container mx-auto p-12">
-        {/* Erster Container */}
         <div className="flex justify-between items-center max-w-4xl mx-auto mb-12 relative">
-          {/* E-Mail oder Vorname */}
           <h1 className="text-3xl font-bold text-[#003f56]">Hallo, {titleName}</h1>
 
-          {/* Profilbild mit Hover-Effekt und Input für Upload */}
           <div className="relative group">
+            {/* Avatar */}
             <Image
-              src={session?.user?.image || defaultProfilePicture}
+              src={avatarUrl || defaultProfilePicture}
               alt="Profilbild"
               width={150}
               height={150}
@@ -101,33 +163,30 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Zweiter Container */}
+        {/* Input Felder */}
         <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {/* Vorname */}
           <div className="col-span-1">
             <label className="text-lg text-[#003f56]">Vorname</label>
             <input
               type="text"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={handleInputChange(setFirstName)}
               placeholder="Vorname eingeben"
               className="w-full px-4 py-2 border rounded text-gray-800 focus:ring-0 focus:border-gray-300"
             />
           </div>
 
-          {/* Nachname */}
           <div className="col-span-1">
             <label className="text-lg text-[#003f56]">Nachname</label>
             <input
               type="text"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={handleInputChange(setLastName)}
               placeholder="Nachname eingeben"
               className="w-full px-4 py-2 border rounded text-gray-800 focus:ring-0 focus:border-gray-300"
             />
           </div>
 
-          {/* E-Mail */}
           <div className="col-span-1">
             <label className="text-lg text-[#003f56]">E-Mail</label>
             <input
@@ -138,26 +197,30 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Telefonnummer */}
           <div className="col-span-1">
             <label className="text-lg text-[#003f56]">Telefon</label>
             <input
               type="text"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handleInputChange(setPhone)}
               placeholder="Telefonnummer eingeben"
               className="w-full px-4 py-2 border rounded text-gray-800 focus:ring-0 focus:border-gray-300"
             />
           </div>
 
           {/* Speichern Knopf */}
-          <div className="col-span-2 flex justify-start mt-6">
+          <div className="col-span-2 flex flex-col items-start mt-6">
             <button
               onClick={handleSave}
               className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
             >
               Speichern
             </button>
+
+            {/* Erfolgreiches Speichern */}
+            {successMessage && (
+              <p className="text-black-600 mt-4">{successMessage}</p>
+            )}
           </div>
         </div>
       </div>
