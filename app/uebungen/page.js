@@ -1,38 +1,21 @@
-'use client';
+import Link from 'next/link';
 
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-
-export default function ProfilePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return <div>Die Seite wird geladen...</div>;
-  }
-
-  if (!session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          Bitte logge dich ein, um die Übungen zu sehen.
-        </div>
-      </div>
-    );
-  }
-
+export default function ExercisesPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <p className="text-lg">Übungen</p>
+    <main className="min-h-screen flex flex-col items-center justify-center">
+      <h1 className="text-4xl mb-8">Wähle eine Übung</h1>
+      <div className="space-y-4">
+        <Link href="/uebungen/deutsch">
+          <button className="bg-blue-500 text-white px-6 py-4 rounded-lg">
+            Deutsch Übung
+          </button>
+        </Link>
+        <Link href="/uebungen/mathematik">
+          <button className="bg-green-500 text-white px-6 py-4 rounded-lg">
+            Mathematik Übung
+          </button>
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }
