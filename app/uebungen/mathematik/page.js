@@ -8,9 +8,10 @@ import Image from 'next/image';
 // Reisetabelle für Aufgabe 2
 const TravelTable = () => {
   return (
-    <table className="min-w-full border-collapse border border-black text-center mb-6">
+    <table className="min-w-full border-collapse border border-black text-center mt-4 mb-8">
       <thead>
         <tr className="bg-[#003f56]">
+          <th rowSpan="2" className="border border-black p-2 text-white">Verkehrsmittel</th>
           <th colSpan="2" className="border border-black p-2 text-white">Zürich – Paris</th>
           <th colSpan="2" className="border border-black p-2 text-white">Zürich – Brüssel</th>
         </tr>
@@ -23,24 +24,28 @@ const TravelTable = () => {
       </thead>
       <tbody>
         <tr>
+          <td className="border border-black p-2">Luftlinie</td>
           <td className="border border-black p-2">488 km</td>
-          <td className="border border-black p-2">x</td>
+          <td className="border border-black p-2"></td>
           <td className="border border-black p-2">493 km</td>
-          <td className="border border-black p-2">x</td>
+          <td className="border border-black p-2"></td>
         </tr>
         <tr>
+          <td className="border border-black p-2">Flugzeug</td>
           <td className="border border-black p-2">490 km</td>
           <td className="border border-black p-2">1 h 15 min</td>
           <td className="border border-black p-2">500 km</td>
           <td className="border border-black p-2">1 h 15 min</td>
         </tr>
         <tr>
+          <td className="border border-black p-2">Zug</td>
           <td className="border border-black p-2">575 km</td>
           <td className="border border-black p-2">4 h 10 min</td>
           <td className="border border-black p-2">848 km</td>
           <td className="border border-black p-2">6 h 50 min</td>
         </tr>
         <tr>
+          <td className="border border-black p-2">Auto</td>
           <td className="border border-black p-2">640 km</td>
           <td className="border border-black p-2">6 h 40 min</td>
           <td className="border border-black p-2">632 km</td>
@@ -75,6 +80,12 @@ export default function MathematikPage() {
     setChecked(true);
   };
 
+  const handleClearAll = () => {
+    setUserAnswers({});
+    setChecked(false);
+    setResults({});
+  };
+
   const formatQuestion = (question) => {
     return question.split('\n').map((line, index) => (
       <span key={index}>
@@ -105,7 +116,6 @@ export default function MathematikPage() {
     };
   }, []);
 
-  // Buchstaben zur Aufzählung der Unteraufgaben
   const letters = ['a', 'b', 'c', 'd', 'e', 'f'];
 
   return (
@@ -124,7 +134,16 @@ export default function MathematikPage() {
         </div>
       </div>
 
-      <div className="container mx-auto p-6 mt-8">
+      {/* Lead */}
+      <div className="container mx-auto p-6 mt-12 mb-12">
+        <p className="text-lg leading-relaxed mb-12">
+          Auf dieser Seite kannst du dein Wissen in Mathematik testen. Du hast keinen Zeitdruck, beim Lösen der Übungen.
+          Wenn du Hilfe benötigst, kannst du neben dem Antwortfeld auf den Button klicken. Dieser gibt dir einen kleinen
+          Hinweis. Klicke am Ende der Seite auf «Prüfen», um deine Antworten mit den Lösungen zu überprüfen. Mit dem Button
+          «Alle Eingaben löschen» kannst du deineAntworten löschen und bei Bedarf die Übung nochmals neustarten. bei den
+          Antworten jeweils nur die Lösungszahl ein. Zusätze wie km/h oder Franken werden nicht benötigt.
+        </p>
+
         {exercises.uebungen.mathematik.aufgaben.map((aufgabe, aufgabeIndex) => (
           <div key={aufgabe.id} className="mb-10">
             {/* Titel */}
@@ -144,20 +163,20 @@ export default function MathematikPage() {
 
             {/* Rendert alle Aufgaben */}
             {aufgabe.tasks.map((task, taskIndex) => (
-              <div key={task.id} className="mb-6">
+              <div key={task.id} className="mb-10">
                 {/* Render die Fragen mit den Buchstaben (a, b, c...) */}
-                <p className="text-black text-base mb-2" style={{ fontSize: '18px' }}>
+                <p className="text-black text-base mb-3" style={{ fontSize: '18px' }}>
                   {letters[taskIndex]}) {task.question && formatQuestion(task.question)}
                 </p>
 
                 {/* Rendert die Mathematik-Formeln unabhängig */}
                 {task.formula && (
-                  <p className="text-black text-base mb-2" style={{ fontSize: '18px' }}>
+                  <p className="text-black text-base mb-3" style={{ fontSize: '18px' }}>
                     <InlineMath math={task.formula} />
                   </p>
                 )}
 
-                <div className="flex items-center mb-2">
+                <div className="flex items-center mb-4">
                   {/* Inputfeld mit halber Breite */}
                   <input
                     type="text"
@@ -176,7 +195,7 @@ export default function MathematikPage() {
                   </button>
                 </div>
 
-                {/* Anzeige des Hinweises */}
+                {/* Hinweis */}
                 {showHint[task.id] && (
                   <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
                 )}
@@ -193,12 +212,21 @@ export default function MathematikPage() {
           </div>
         ))}
 
-        <button
-          onClick={handleCheckAnswers}
-          className="bg-[#003f56] hover:bg-[#004f66] text-white px-4 py-2 rounded hover:bg-[#004f66]"
-        >
-          Prüfen
-        </button>
+        {/* Prüfen and Clear-Button */}
+        <div className="flex gap-4">
+          <button
+            onClick={handleCheckAnswers}
+            className="bg-[#003f56] hover:bg-[#004f66] text-white px-4 py-2 rounded hover:bg-[#004f66]"
+          >
+            Prüfen
+          </button>
+          <button
+            onClick={handleClearAll}
+            className="bg-[#003f56] hover:bg-[#004f66] text-white px-4 py-2 rounded hover:bg-[#004f66]"
+          >
+            Alle Eingaben löschen
+          </button>
+        </div>
       </div>
     </div>
   );

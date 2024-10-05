@@ -13,7 +13,7 @@
                 "formula": "2 \\cdot x \\, \\text{kg} + 536 \\, \\text{kg} = 1.24 \\, \\text{t}",
                 "solution": "360",
                 "type": "numeric",
-                "hint": "Versuche rückwärts zu rechnen beginnend mit dem letzten Schritt."
+                "hint": "Formel vereinfachen und x berechnen."
               },
               {
                 "id": 2,
@@ -21,7 +21,7 @@
                 "formula": "\\frac{5}{9} \\cdot 2h33min - x \\text{ min} = \\frac{3}{5}h",
                 "solution": "49",
                 "type": "numeric",
-                "hint": "Formel vereinfachen und x berechnen"
+                "hint": "Formel vereinfachen und x berechnen."
               }
             ]
           },
@@ -36,21 +36,21 @@
                 "question": "Der schnellste Weg mit dem Zug von Zürich nach Brüssel führt über Paris. Wie weit ist demnach die Distanz von Paris nach Brüssel mit dem Zug?",
                 "solution": "273",
                 "type": "numeric",
-                "hint": "Vergleiche die Distanzen"
+                "hint": "Vergleiche die Distanzen."
               },
               {
                 "id": 4,
                 "question": "Wie viele km/h beträgt die Durchschnittsgeschwindigkeit eines Fluges von Zürich nach Brüssel?",
                 "solution": "400",
                 "type": "numeric",
-                "hint": "Verwenden Sie die Formel A = πr²"
+                "hint": "Errechne die absolvierenden Kilometer auf 60 Minuten."
               },
               {
                 "id": 5,
                 "question": "Wie viele Minuten könnte ein Auto auf der Fahrt von Zürich nach Brüssel einsparen, wenn es gleich schnell fahren könnte wie ein Auto auf der Fahrt von Zürich nach Paris?",
                 "solution": "40",
                 "type": "numeric",
-                "hint": "Quadrieren der Zahl"
+                "hint": "Errechne zuerst die Geschwindigkeit eines Autos von Zürich nach Paris."
               }
             ]
           }
