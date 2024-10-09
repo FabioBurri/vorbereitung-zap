@@ -63,9 +63,12 @@ export default function MathematikPage() {
   const [showHint, setShowHint] = useState({});
 
   const handleInputChange = (e, id) => {
+    const { value } = e.target;
+
+    // Ensure only one checkbox is selected (either 'true' or 'false')
     setUserAnswers({
       ...userAnswers,
-      [id]: e.target.value,
+      [id]: value,
     });
   };
 
@@ -139,8 +142,8 @@ export default function MathematikPage() {
         <p className="text-lg leading-relaxed mb-12">
           Auf dieser Seite kannst du dein Wissen in Mathematik testen. Du hast keinen Zeitdruck, beim Lösen der Übungen.
           Wenn du Hilfe benötigst, kannst du neben dem Antwortfeld auf den Button klicken. Dieser gibt dir einen kleinen
-          Hinweis. Klicke am Ende der Seite auf «Prüfen», um deine Antworten mit den Lösungen zu überprüfen. Mit dem Button
-          «Alle Eingaben löschen» kannst du deineAntworten löschen und bei Bedarf die Übung nochmals neustarten. bei den
+          Hinweis. Klicke am Ende der Seite auf «Prüfen», um deine Antworten mit den Lösungen zu vergleichen. Mit dem Button
+          «Alle Eingaben löschen» kannst du deine Antworten löschen und bei Bedarf die Übung nochmals neustarten. Gib bei den
           Antworten jeweils nur die Lösungszahl ein. Zusätze wie km/h oder Franken werden nicht benötigt.
         </p>
 
@@ -169,6 +172,14 @@ export default function MathematikPage() {
                   {letters[taskIndex]}) {task.question && formatQuestion(task.question)}
                 </p>
 
+                {/* Render image für Aufgabe 3 */}
+                {task.id === 6 && (
+                  <Image className="my-6" src="/Aufgabe 3a1.png" alt="Aufgabe 3a1" width={300} height={300} />
+                )}
+                {task.id === 7 && (
+                  <Image className="my-6" src="/Aufgabe 3a2.png" alt="Aufgabe 3a2" width={300} height={300} />
+                )}
+
                 {/* Rendert die Mathematik-Formeln unabhängig */}
                 {task.formula && (
                   <p className="text-black text-base mb-3" style={{ fontSize: '18px' }}>
@@ -176,31 +187,74 @@ export default function MathematikPage() {
                   </p>
                 )}
 
-                <div className="flex items-center mb-4">
-                  {/* Inputfeld mit halber Breite */}
-                  <input
-                    type="text"
-                    value={userAnswers[task.id] || ''}
-                    onChange={(e) => handleInputChange(e, task.id)}
-                    className="border p-2 rounded w-1/2"
-                    placeholder="Deine Antwort"
-                  />
+                {task.type === 'numeric' && (
+                  <div className="flex items-center mb-4">
+                    {/* Inputfeld mit halber Breite */}
+                    <input
+                      type="text"
+                      value={userAnswers[task.id] || ''}
+                      onChange={(e) => handleInputChange(e, task.id)}
+                      className="border p-2 rounded w-1/2"
+                      placeholder="Deine Antwort"
+                    />
 
-                  {/* Button für den Hinweis */}
-                  <button
-                    onClick={() => handleToggleHint(task.id)}
-                    className="ml-2 bg-[#003f56] hover:bg-[#004f66] text-white px-3 py-2 rounded-lg flex items-center"
-                  >
-                    <Image src="/gluhbirne_weiss.png" alt="Hint" width={24} height={24} />
-                  </button>
-                </div>
+                    {/* Button für den Hinweis */}
+                    <button
+                      onClick={() => handleToggleHint(task.id)}
+                      className="ml-2 bg-[#003f56] hover:bg-[#004f66] text-white px-3 py-2 rounded-lg flex items-center"
+                    >
+                      <Image src="/gluhbirne_weiss.png" alt="Hint" width={24} height={24} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Checkbox */}
+                {task.type === 'bool' && (
+                  <div className="flex items-center gap-4 mb-6">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name={`task-${task.id}`}
+                        value="true"
+                        checked={userAnswers[task.id] === 'true'}
+                        onChange={(e) => handleInputChange(e, task.id)}
+                        className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm checked:bg-[#003f56] checked:border-[#003f56]
+                                  focus:outline-none focus:ring-2 focus:ring-[#003f56] 
+                                  checked:after:content-['✓'] checked:after:text-white checked:after:text-center checked:after:inline-block checked:after:w-full checked:after:h-full checked:after:leading-none checked:after:pt-[2px] flex justify-center items-center"
+                      />
+                      <span className="text-black ml-2">Richtig</span>
+                    </label>
+
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name={`task-${task.id}`}
+                        value="false"
+                        checked={userAnswers[task.id] === 'false'}
+                        onChange={(e) => handleInputChange(e, task.id)}
+                        className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm checked:bg-[#003f56] checked:border-[#003f56]
+                                  focus:outline-none focus:ring-2 focus:ring-[#003f56] 
+                                  checked:after:content-['✓'] checked:after:text-white checked:after:text-center checked:after:inline-block checked:after:w-full checked:after:h-full checked:after:leading-none checked:after:pt-[2px] flex justify-center items-center"
+                      />
+                      <span className="text-black ml-2">Falsch</span>
+                    </label>
+                  </div>
+                )}
 
                 {/* Hinweis */}
                 {showHint[task.id] && (
                   <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
                 )}
 
-                {checked && (
+                {checked && task.type === 'bool' && (
+                  <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
+                    {results[task.id]
+                      ? 'Richtig'
+                      : `Falsch, die richtige Antwort ist: ${task.solution === 'true' ? 'Richtig' : 'Falsch'}`}
+                  </p>
+                )}
+
+                {checked && task.type === 'numeric' && (
                   <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
                     {results[task.id]
                       ? 'Richtig'
