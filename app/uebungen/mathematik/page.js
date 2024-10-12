@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import exercises from '../../data/mathematik_exercises.json';
 import { InlineMath } from 'react-katex';
 import Image from 'next/image';
+import { supabase } from '../../lib/supabaseClient';
 
 // Reisetabelle für Aufgabe 2
 const TravelTable = () => {
@@ -62,28 +63,101 @@ export default function MathematikPage() {
   const [results, setResults] = useState({});
   const [showHint, setShowHint] = useState({});
 
+  useEffect(() => {
+    const loadUserAnswers = async () => {
+      const user = await supabase.auth.getUser();
+
+      if (user.data) {
+        const { id: user_id } = user.data.user;
+
+        const { data, error } = await supabase
+          .from('user_exercises')
+          .select('*')
+          .eq('user_id', user_id);
+
+        if (error) {
+          console.error('Error fetching user answers:', error);
+        } else {
+          const savedAnswers = {};
+          data.forEach((answer) => {
+            savedAnswers[answer.question_id] = answer.user_answer;
+          });
+          setUserAnswers(savedAnswers);
+        }
+      }
+    };
+
+    loadUserAnswers();
+  }, []);
+
   const handleInputChange = (e, id) => {
     const { value } = e.target;
 
-    // Ensure only one checkbox is selected (either 'true' or 'false')
     setUserAnswers({
       ...userAnswers,
       [id]: value,
     });
   };
 
-  const handleCheckAnswers = () => {
+  const handleCheckAnswers = async () => {
     const currentResults = {};
     exercises.uebungen.mathematik.aufgaben.forEach((aufgabe) => {
-      aufgabe.tasks.forEach((task) => {
-        currentResults[task.id] = userAnswers[task.id] === task.solution;
+      aufgabe.tasks.forEach(async (task) => {
+        if (task.type !== 'multi') {
+          const isCorrect = userAnswers[task.id] === task.solution;
+          currentResults[task.id] = isCorrect;
+
+          const user = await supabase.auth.getUser();
+          const user_id = user.data?.user?.id;
+
+          if (user_id) {
+            const { data, error } = await supabase
+              .from('user_exercises')
+              .select('id')
+              .eq('user_id', user_id)
+              .eq('question_id', task.id)
+              .single();
+
+            if (data) {
+              await supabase
+                .from('user_exercises')
+                .update({
+                  exercise_type: 'mathematik',
+                  user_answer: userAnswers[task.id],
+                  is_correct: isCorrect,
+                  question: task.question,
+                })
+                .eq('id', data.id);
+            } else {
+              await supabase.from('user_exercises').insert({
+                user_id,
+                exercise_type: 'mathematik',
+                question_id: task.id,
+                question: task.question,
+                user_answer: userAnswers[task.id],
+                is_correct: isCorrect,
+              });
+            }
+          }
+        }
       });
     });
     setResults(currentResults);
     setChecked(true);
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
+    const user = await supabase.auth.getUser();
+    const user_id = user.data?.user?.id;
+
+    if (user_id) {
+      await supabase
+        .from('user_exercises')
+        .delete()
+        .eq('user_id', user_id)
+        .eq('exercise_type', 'mathematik');
+    }
+
     setUserAnswers({});
     setChecked(false);
     setResults({});
@@ -173,10 +247,10 @@ export default function MathematikPage() {
                 </p>
 
                 {/* Render image für Aufgabe 3 */}
-                {task.id === 6 && (
+                {task.id === 14 && (
                   <Image className="my-6" src="/Aufgabe 3a1.png" alt="Aufgabe 3a1" width={300} height={300} />
                 )}
-                {task.id === 7 && (
+                {task.id === 15 && (
                   <Image className="my-6" src="/Aufgabe 3a2.png" alt="Aufgabe 3a2" width={300} height={300} />
                 )}
 

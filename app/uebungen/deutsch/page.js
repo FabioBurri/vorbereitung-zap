@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import exercises from '../../data/deutsch_exercises.json';
 import Image from 'next/image';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function DeutschPage() {
   const [userAnswers, setUserAnswers] = useState({});
@@ -27,24 +28,69 @@ export default function DeutschPage() {
     }
   };
 
-  const handleCheckAnswers = () => {
+  const handleCheckAnswers = async () => {
     const currentResults = {};
     exercises.uebungen.deutsch.aufgaben.forEach((aufgabe) => {
-      aufgabe.tasks.forEach((task) => {
+      aufgabe.tasks.forEach(async (task) => {
         if (task.type !== 'multi') {
-          currentResults[task.id] = userAnswers[task.id] === task.solution;
+          const isCorrect = userAnswers[task.id] === task.solution;
+          currentResults[task.id] = isCorrect;
+  
+          const user = await supabase.auth.getUser();
+          const user_id = user.data?.user?.id;
+  
+          if (user_id) {
+            const { data, error } = await supabase
+              .from('user_exercises')
+              .select('id')
+              .eq('user_id', user_id)
+              .eq('question_id', task.id)
+              .single();
+  
+            if (data) {
+              await supabase
+                .from('user_exercises')
+                .update({
+                  exercise_type: 'deutsch',
+                  user_answer: userAnswers[task.id],
+                  is_correct: isCorrect,
+                  question: task.question,
+                })
+                .eq('id', data.id);
+            } else {
+              await supabase.from('user_exercises').insert({
+                user_id,
+                exercise_type: 'deutsch',
+                question_id: task.id,
+                question: task.question,
+                user_answer: userAnswers[task.id],
+                is_correct: isCorrect,
+              });
+            }
+          }
         }
       });
     });
     setResults(currentResults);
     setChecked(true);
-  };
+  };  
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
+    const user = await supabase.auth.getUser();
+    const user_id = user.data?.user?.id;
+  
+    if (user_id) {
+      await supabase
+        .from('user_exercises')
+        .delete()
+        .eq('user_id', user_id)
+        .eq('exercise_type', 'deutsch');
+    }
+  
     setUserAnswers({});
     setChecked(false);
     setResults({});
-  };
+  };  
 
   const handleToggleHint = (id) => {
     setShowHint((prevState) => ({
@@ -153,39 +199,53 @@ export default function DeutschPage() {
               <div key={task.id} className="mb-6">
                 <p className="text-black text-base mb-2">{task.question}</p>
 
-                {/* Aufgabe 3 */}
-                {task.id === 6 ? (
-                  <div className="mb-10">
-
-                    {/* Vier Input-Felder */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {[1, 2, 3, 4].map((num) => (
-                        <input
-                          key={num}
-                          type="text"
-                          value={userAnswers[`aufgabe_3_${num}`] || ''}
-                          onChange={(e) => handleInputChange(e, `aufgabe_3_${num}`)}
-                          className="border p-2 rounded w-full"
-                          placeholder={`Antwort ${num}`}
+                {/* Aufgabe 5 */}
+                {task.id === 8 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {task.options.map((option, index) => (
+                      <div key={index} className="mb-4">
+                        <p
+                          className="text-black text-base mb-2"
+                          dangerouslySetInnerHTML={{
+                            __html: option.text.replace('schlenderte', '<strong>schlenderte</strong>')
+                                              .replace('gleichgültig', '<strong>gleichgültig</strong>')
+                                              .replace('zerrissene', '<strong>zerrissene</strong>')
+                                              .replace('sanft', '<strong>sanft</strong>')
+                                              .replace('distanziert', '<strong>distanziert</strong>'),
+                          }}
                         />
-                      ))}
-                    </div>
-
-                    {/* Mehrere Antwortmöglichkeiten */}
-                    {checked && (
-                      <div className="mt-4">
-                        <h4 className="text-[#003f56] font-semibold mb-2">Mögliche Antworten:</h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          <li>schwächere Umarmung / drückt weniger bei Umarmung</li>
-                          <li>Ausrede / angeblich wenig Zeit / muss weiter</li>
-                          <li>leise Stimme, als ob sie Merals Ohren schonen wolle</li>
-                          <li>verlegenes Lächeln</li>
-                          <li>sie wiederholt ihre Ausrede zur Zeitknappheit</li>
-                        </ul>
+                        <div className="grid grid-cols-1 gap-2">
+                          {option.answers.map((answer, answerIndex) => (
+                            <label key={answerIndex} className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                name={`option_${index}`}
+                                value={answer}
+                                checked={userAnswers[`option_${index}`] === answer}
+                                onChange={(e) => handleInputChange(e, `option_${index}`)}
+                                className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm 
+                                          checked:bg-[#003f56] checked:border-[#003f56] 
+                                          focus:outline-none focus:ring-2 focus:ring-[#003f56] 
+                                          checked:after:content-['✓'] checked:after:text-white 
+                                          checked:after:text-center checked:after:inline-block 
+                                          checked:after:w-full checked:after:h-full 
+                                          checked:after:leading-none checked:after:pt-[2px] flex justify-center items-center"
+                              />
+                              <span className="text-black">{answer}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {checked && (
+                          <p className={`mt-2 ${userAnswers[`option_${index}`] === option.solution ? 'text-green-500' : 'text-red-500'}`}>
+                            {userAnswers[`option_${index}`] === option.solution
+                              ? 'Richtig'
+                              : `Falsch, die richtige Antwort ist: ${option.solution}`}
+                          </p>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ) : (
+                ) : task.type === 'text' ? ( 
                   <div className="flex items-center mb-4">
                     <input
                       type="text"
@@ -202,15 +262,47 @@ export default function DeutschPage() {
                       <Image src="/gluhbirne_weiss.png" alt="Hint" width={24} height={24} />
                     </button>
                   </div>
+                ) : null}
+
+                {/* Aufgabe 3 */}
+                {task.id === 6 && (
+                  <div className="mb-10">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {[1, 2, 3, 4].map((num) => (
+                        <input
+                          key={num}
+                          type="text"
+                          value={userAnswers[`aufgabe_3_${num}`] || ''}
+                          onChange={(e) => handleInputChange(e, `aufgabe_3_${num}`)}
+                          className="border p-2 rounded w-full"
+                          placeholder={`Antwort ${num}`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Mögliche Antworten */}
+                    {checked && (
+                      <div className="mt-4">
+                        <h4 className="text-[#003f56] font-semibold mb-2">Mögliche Antworten:</h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          <li>schwächere Umarmung / drückt weniger bei Umarmung</li>
+                          <li>Ausrede / angeblich wenig Zeit / muss weiter</li>
+                          <li>leise Stimme, als ob sie Merals Ohren schonen wolle</li>
+                          <li>verlegenes Lächeln</li>
+                          <li>sie wiederholt ihre Ausrede zur Zeitknappheit</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 )}
 
-                {/* Hinweis ausblenden bei Aufgabe 3 */}
-                {task.id !== 6 && showHint[task.id] && (
+                {/* Hinweis */}
+                {task.id !== 6 && task.id !== 8 && showHint[task.id] && (
                   <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
                 )}
 
-                {/* Resultat ausblenden bei Aufgabe 3 */}
-                {checked && task.id !== 6 && (
+                {/* Resultat */}
+                {checked && task.id !== 6 && task.id !== 8 && (
                   <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
                     {results[task.id]
                       ? 'Richtig'
@@ -222,7 +314,7 @@ export default function DeutschPage() {
           </div>
         ))}
 
-        {/* Prüfen and Clear-Button */}
+        {/* Prüfen und Eingabe-löschen-Button */}
         <div className="flex gap-4">
           <button
             onClick={handleCheckAnswers}
