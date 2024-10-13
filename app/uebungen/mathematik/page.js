@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import exercises from '../../data/mathematik_exercises.json';
 import { InlineMath } from 'react-katex';
 import Image from 'next/image';
@@ -58,109 +59,106 @@ const TravelTable = () => {
 };
 
 export default function MathematikPage() {
+  const { data: session } = useSession();
   const [userAnswers, setUserAnswers] = useState({});
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState({});
   const [showHint, setShowHint] = useState({});
+  
+  const userId = session?.user?.id;
 
   useEffect(() => {
-    const loadUserAnswers = async () => {
-      const user = await supabase.auth.getUser();
-
-      if (user.data) {
-        const { id: user_id } = user.data.user;
-
-        const { data, error } = await supabase
+    if (userId) {
+      const fetchUserAnswers = async () => {
+        const { data: savedAnswers, error } = await supabase
           .from('user_exercises')
           .select('*')
-          .eq('user_id', user_id);
+          .eq('user_id', userId)
+          .eq('exercise_type', 'mathematik');
 
-        if (error) {
-          console.error('Error fetching user answers:', error);
-        } else {
-          const savedAnswers = {};
-          data.forEach((answer) => {
-            savedAnswers[answer.question_id] = answer.user_answer;
+        if (!error && savedAnswers) {
+          const answers = {};
+          savedAnswers.forEach((answer) => {
+            answers[answer.question_id] = answer.user_answer;
           });
-          setUserAnswers(savedAnswers);
+          setUserAnswers(answers);
         }
-      }
-    };
+      };
 
-    loadUserAnswers();
-  }, []);
+      fetchUserAnswers();
+    }
+  }, [userId]);
 
   const handleInputChange = (e, id) => {
-    const { value } = e.target;
-
     setUserAnswers({
       ...userAnswers,
-      [id]: value,
+      [id]: e.target.value,
     });
   };
 
   const handleCheckAnswers = async () => {
     const currentResults = {};
-    exercises.uebungen.mathematik.aufgaben.forEach((aufgabe) => {
-      aufgabe.tasks.forEach(async (task) => {
-        if (task.type !== 'multi') {
+
+    if (userId) {
+      for (const aufgabe of exercises.uebungen.mathematik.aufgaben) {
+        for (const task of aufgabe.tasks) {
           const isCorrect = userAnswers[task.id] === task.solution;
           currentResults[task.id] = isCorrect;
 
-          const user = await supabase.auth.getUser();
-          const user_id = user.data?.user?.id;
+          const { data, error } = await supabase
+            .from('user_exercises')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('question_id', task.id)
+            .single();
 
-          if (user_id) {
-            const { data, error } = await supabase
+          if (data) {
+            await supabase
               .from('user_exercises')
-              .select('id')
-              .eq('user_id', user_id)
-              .eq('question_id', task.id)
-              .single();
-
-            if (data) {
-              await supabase
-                .from('user_exercises')
-                .update({
-                  exercise_type: 'mathematik',
-                  user_answer: userAnswers[task.id],
-                  is_correct: isCorrect,
-                  question: task.question,
-                })
-                .eq('id', data.id);
-            } else {
-              await supabase.from('user_exercises').insert({
-                user_id,
+              .update({
                 exercise_type: 'mathematik',
-                question_id: task.id,
-                question: task.question,
                 user_answer: userAnswers[task.id],
                 is_correct: isCorrect,
-              });
-            }
+                question: task.question,
+              })
+              .eq('id', data.id);
+          } else {
+            await supabase.from('user_exercises').insert({
+              user_id: userId,
+              exercise_type: 'mathematik',
+              question_id: task.id,
+              question: task.question,
+              user_answer: userAnswers[task.id],
+              is_correct: isCorrect,
+            });
           }
         }
-      });
-    });
+      }
+    }
+
     setResults(currentResults);
     setChecked(true);
   };
 
   const handleClearAll = async () => {
-    const user = await supabase.auth.getUser();
-    const user_id = user.data?.user?.id;
-
-    if (user_id) {
+    if (userId) {
       await supabase
         .from('user_exercises')
         .delete()
-        .eq('user_id', user_id)
+        .eq('user_id', userId)
         .eq('exercise_type', 'mathematik');
     }
 
     setUserAnswers({});
     setChecked(false);
     setResults({});
+  };
+
+  const handleToggleHint = (id) => {
+    setShowHint((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
   };
 
   const formatQuestion = (question) => {
@@ -171,27 +169,6 @@ export default function MathematikPage() {
       </span>
     ));
   };
-
-  const handleToggleHint = (id) => {
-    setShowHint((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  };
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .katex-html {
-        display: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   const letters = ['a', 'b', 'c', 'd', 'e', 'f'];
 
@@ -235,18 +212,17 @@ export default function MathematikPage() {
               </p>
             )}
 
-            {/* Rendert die Tabelle */}
+            {/* Reisetabelle für Aufgabe 2 */}
             {aufgabe.table && <TravelTable />}
 
-            {/* Rendert alle Aufgaben */}
+            {/* Aufgaben */}
             {aufgabe.tasks.map((task, taskIndex) => (
               <div key={task.id} className="mb-10">
-                {/* Render die Fragen mit den Buchstaben (a, b, c...) */}
                 <p className="text-black text-base mb-3" style={{ fontSize: '18px' }}>
                   {letters[taskIndex]}) {task.question && formatQuestion(task.question)}
                 </p>
 
-                {/* Render image für Aufgabe 3 */}
+                {/* Bilder für Aufgabe 3 */}
                 {task.id === 14 && (
                   <Image className="my-6" src="/Aufgabe 3a1.png" alt="Aufgabe 3a1" width={300} height={300} />
                 )}
@@ -254,16 +230,16 @@ export default function MathematikPage() {
                   <Image className="my-6" src="/Aufgabe 3a2.png" alt="Aufgabe 3a2" width={300} height={300} />
                 )}
 
-                {/* Rendert die Mathematik-Formeln unabhängig */}
+                {/* Formeln */}
                 {task.formula && (
                   <p className="text-black text-base mb-3" style={{ fontSize: '18px' }}>
                     <InlineMath math={task.formula} />
                   </p>
                 )}
 
+                {/* Antwortfelder */}
                 {task.type === 'numeric' && (
                   <div className="flex items-center mb-4">
-                    {/* Inputfeld mit halber Breite */}
                     <input
                       type="text"
                       value={userAnswers[task.id] || ''}
@@ -272,7 +248,7 @@ export default function MathematikPage() {
                       placeholder="Deine Antwort"
                     />
 
-                    {/* Button für den Hinweis */}
+                    {/* Hinweis Knopf */}
                     <button
                       onClick={() => handleToggleHint(task.id)}
                       className="ml-2 bg-[#003f56] hover:bg-[#004f66] text-white px-3 py-2 rounded-lg flex items-center"
@@ -287,7 +263,7 @@ export default function MathematikPage() {
                   <div className="flex items-center gap-4 mb-6">
                     <label className="flex items-center space-x-2">
                       <input
-                        type="checkbox"
+                        type="radio"
                         name={`task-${task.id}`}
                         value="true"
                         checked={userAnswers[task.id] === 'true'}
@@ -301,7 +277,7 @@ export default function MathematikPage() {
 
                     <label className="flex items-center space-x-2">
                       <input
-                        type="checkbox"
+                        type="radio"
                         name={`task-${task.id}`}
                         value="false"
                         checked={userAnswers[task.id] === 'false'}
@@ -320,6 +296,7 @@ export default function MathematikPage() {
                   <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
                 )}
 
+                {/* Feedback */}
                 {checked && task.type === 'bool' && (
                   <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
                     {results[task.id]
@@ -340,7 +317,7 @@ export default function MathematikPage() {
           </div>
         ))}
 
-        {/* Prüfen and Clear-Button */}
+        {/* Prüfen und Clear-Button */}
         <div className="flex gap-4">
           <button
             onClick={handleCheckAnswers}

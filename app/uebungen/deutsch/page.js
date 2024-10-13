@@ -1,15 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import exercises from '../../data/deutsch_exercises.json';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function DeutschPage() {
+  const { data: session } = useSession();
   const [userAnswers, setUserAnswers] = useState({});
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState({});
   const [showHint, setShowHint] = useState({});
+  
+  const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (userId) {
+      const fetchUserAnswers = async () => {
+        const { data: savedAnswers, error } = await supabase
+          .from('user_exercises')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('exercise_type', 'deutsch');
+
+        if (!error && savedAnswers) {
+          const answers = {};
+          savedAnswers.forEach((answer) => {
+            answers[answer.question_id] = answer.user_answer;
+          });
+          setUserAnswers(answers);
+        }
+      };
+
+      fetchUserAnswers();
+    }
+  }, [userId]);
 
   const handleInputChange = (e, id, subIndex = null) => {
     if (subIndex !== null) {
@@ -30,67 +56,73 @@ export default function DeutschPage() {
 
   const handleCheckAnswers = async () => {
     const currentResults = {};
-    exercises.uebungen.deutsch.aufgaben.forEach((aufgabe) => {
-      aufgabe.tasks.forEach(async (task) => {
-        if (task.type !== 'multi') {
-          const isCorrect = userAnswers[task.id] === task.solution;
-          currentResults[task.id] = isCorrect;
   
-          const user = await supabase.auth.getUser();
-          const user_id = user.data?.user?.id;
-  
-          if (user_id) {
-            const { data, error } = await supabase
-              .from('user_exercises')
-              .select('id')
-              .eq('user_id', user_id)
-              .eq('question_id', task.id)
-              .single();
-  
-            if (data) {
-              await supabase
-                .from('user_exercises')
-                .update({
-                  exercise_type: 'deutsch',
-                  user_answer: userAnswers[task.id],
-                  is_correct: isCorrect,
-                  question: task.question,
-                })
-                .eq('id', data.id);
-            } else {
+    if (userId) {
+      for (const aufgabe of exercises.uebungen.deutsch.aufgaben) {
+        for (const task of aufgabe.tasks) {
+          if (task.id === 6) {
+            for (let i = 1; i <= 4; i++) {
+              const inputKey = `aufgabe_3_${i}`;
+              currentResults[inputKey] = false;
               await supabase.from('user_exercises').insert({
-                user_id,
+                user_id: userId,
                 exercise_type: 'deutsch',
                 question_id: task.id,
                 question: task.question,
-                user_answer: userAnswers[task.id],
-                is_correct: isCorrect,
+                user_answer: userAnswers[inputKey] || '',
+                is_correct: null,
               });
             }
+          } else if (task.id === 8) {
+            task.options.forEach(async (option, index) => {
+              const optionKey = `option_${index}`;
+              const isCorrect = userAnswers[optionKey] === option.solution;
+              currentResults[optionKey] = isCorrect;
+  
+              await supabase.from('user_exercises').insert({
+                user_id: userId,
+                exercise_type: 'deutsch',
+                question_id: task.id,
+                question: option.text,
+                user_answer: userAnswers[optionKey] || '',
+                is_correct: isCorrect,
+              });
+            });
+          } else {
+            const isCorrect = userAnswers[task.id] === task.solution;
+            currentResults[task.id] = isCorrect;
+  
+            await supabase.from('user_exercises').insert({
+              user_id: userId,
+              exercise_type: 'deutsch',
+              question_id: task.id,
+              question: task.question,
+              user_answer: userAnswers[task.id] || '',
+              is_correct: isCorrect,
+            });
           }
         }
-      });
-    });
+      }
+    }
+  
     setResults(currentResults);
     setChecked(true);
-  };  
+  };
+  
 
   const handleClearAll = async () => {
-    const user = await supabase.auth.getUser();
-    const user_id = user.data?.user?.id;
-  
-    if (user_id) {
+    if (userId) {
       await supabase
         .from('user_exercises')
         .delete()
-        .eq('user_id', user_id)
+        .eq('user_id', userId)
         .eq('exercise_type', 'deutsch');
     }
-  
+
     setUserAnswers({});
     setChecked(false);
     setResults({});
-  };  
+  };
 
   const handleToggleHint = (id) => {
     setShowHint((prevState) => ({
@@ -116,6 +148,7 @@ export default function DeutschPage() {
       </div>
 
       <div className="container mx-auto p-6 mt-12">
+        
         {/* Lead */}
         <p className="text-lg leading-relaxed mb-12">
           Auf dieser Seite erwartet dich ein Textverständnis. Du hast keinen Zeitdruck, beim Beantworten der Fragen.
@@ -301,7 +334,7 @@ export default function DeutschPage() {
                   <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
                 )}
 
-                {/* Resultat */}
+                {/* Feedback */}
                 {checked && task.id !== 6 && task.id !== 8 && (
                   <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
                     {results[task.id]

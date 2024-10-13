@@ -57,7 +57,15 @@
             {
               "id": 6,
               "question": "Gleich im ersten Abschnitt wird deutlich, dass Meral das Verhalten von Sarah beim Wiedersehen als zurückhaltend empfindet.",
-              "solution": ""
+              "type": "multiple_input", 
+              "input_count": 4,
+              "possible_solutions": [
+                "schwächere Umarmung / drückt weniger bei Umarmung",
+                "Ausrede / angeblich wenig Zeit / muss weiter",
+                "leise Stimme, als ob sie Merals Ohren schonen wolle",
+                "verlegenes Lächeln",
+                "sie wiederholt ihre Ausrede zur Zeitknappheit"
+              ]
             }
           ]
         },
@@ -81,60 +89,31 @@
             {
               "id": 8,
               "question": "Kreuze jeweils nur eine Lösung an, die der Bedeutung der fett gedruckten Wörter und Ausdrücke am besten entspricht. Deine Lösung muss inhaltlich zum Text passen.",
+              "type": "multiple_choice",
               "options": [
                 {
                   "text": "Ich schlenderte durch die Marktgasse und traf zufällig auf Sarah.",
-                  "answers": [
-                    "trottete",
-                    "pilgerte",
-                    "bummelte",
-                    "ging",
-                    "marschierte"
-                  ],
+                  "answers": ["trottete", "pilgerte", "bummelte", "ging", "marschierte"],
                   "solution": "bummelte"
                 },
                 {
                   "text": "Ich erklärte Sarah damals scheinbar gleichgültig: «Im Kosovo wohnten wir vor dem Krieg ausserhalb des Dorfes, wir hatten Elefanten im Garten (...)",
-                  "answers": [
-                    "gleichmässig",
-                    "unbeteiligt",
-                    "freudlos",
-                    "verbittert",
-                    "abgebrüht"
-                  ],
+                  "answers": ["gleichmässig", "unbeteiligt", "freudlos", "verbittert", "abgebrüht"],
                   "solution": "unbeteiligt"
                 },
                 {
                   "text": "Grossvater hatte nach diesem Angriff nur zerrissene Hosen.",
-                  "answers": [
-                    "geschlissene",
-                    "verschleissste",
-                    "löchrige",
-                    "zerfetzte",
-                    "abgerissene"
-                  ],
+                  "answers": ["geschlissene", "verschleissste", "löchrige", "zerfetzte", "abgerissene"],
                   "solution": "zerfetzte"
                 },
                 {
                   "text": "Der Löwe war, nachdem er mit meinem Grossvater gekämpft hatte, sanft geworden, spielte sogar mit mir und meiner Schwester im Garten.",
-                  "answers": [
-                    "zart",
-                    "wohlwollend",
-                    "zahm",
-                    "herzlich",
-                    "gnädig"
-                  ],
+                  "answers": ["zart", "wohlwollend", "zahm", "herzlich", "gnädig"],
                   "solution": "zahm"
                 },
                 {
                   "text": "«Treffen wir uns doch irgendwann einmal», meinte Sarah distanziert, «ich würde dich gerne wiedersehen (...)",
-                  "answers": [
-                    "aus der Ferne",
-                    "zugeknöpft",
-                    "böse",
-                    "barsch",
-                    "unhöflich"
-                  ],
+                  "answers": ["aus der Ferne", "zugeknöpft", "böse", "barsch", "unhöflich"],
                   "solution": "zugeknöpft"
                 }
               ]
