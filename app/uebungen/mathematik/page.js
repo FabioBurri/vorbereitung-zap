@@ -89,6 +89,20 @@ export default function MathematikPage() {
     }
   }, [userId]);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .katex-html {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const handleInputChange = (e, id) => {
     setUserAnswers({
       ...userAnswers,
