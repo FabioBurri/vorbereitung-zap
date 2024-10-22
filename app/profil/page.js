@@ -123,8 +123,8 @@ export default function ProfilePage() {
       {/* Header Bild */}
       <div className="relative w-full h-[400px]">
         <Image
-          src="/Lernen.jpg"
-          alt="Lernen"
+          src="/profil.jpg"
+          alt="Profil"
           fill={true}
           objectFit="cover"
           objectPosition="center"

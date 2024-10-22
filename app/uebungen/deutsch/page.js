@@ -135,8 +135,8 @@ export default function DeutschPage() {
     <div className="min-h-screen">
       <div className="relative w-full h-[400px]">
         <Image
-          src="/Lernen.jpg"
-          alt="Lernen"
+          src="/deutsch.jpg"
+          alt="Deutsch"
           fill={true}
           objectFit="cover"
           objectPosition="center"

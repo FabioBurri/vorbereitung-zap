@@ -190,8 +190,8 @@ export default function MathematikPage() {
     <div className="min-h-screen">
       <div className="relative w-full h-[400px]">
         <Image
-          src="/Lernen.jpg"
-          alt="Lernen"
+          src="/mathematik.avif"
+          alt="Matkematik"
           fill={true}
           objectFit="cover"
           objectPosition="center"

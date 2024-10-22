@@ -136,12 +136,12 @@ export default function KursePage() {
       {/* Header Bild und Titel */}
       <div className="relative w-full h-[400px]">
         <img
-          src="/Lernen.jpg"
-          alt="Lernen"
+          src="/kurse.jpg"
+          alt="Kurse"
           className="w-full h-full object-cover rounded-lg"
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <h1 className="text-5xl font-bold text-white drop-shadow-lg">Kurse Anmeldung</h1>
+          <h1 className="text-5xl font-bold text-white drop-shadow-lg">Anmeldung Kurse</h1>
         </div>
       </div>
 
