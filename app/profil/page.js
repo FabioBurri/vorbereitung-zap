@@ -109,7 +109,7 @@ export default function ProfilePage() {
     if (error) {
       console.log('Error updating profile:', error.message);
     } else {
-      setSuccessMessage('Das Speichern war erfolgreich.');
+      setSuccessMessage('Dein Profil wurde aktualisiert.');
     }
   };
 

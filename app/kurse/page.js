@@ -9,7 +9,7 @@ export default function KursePage() {
   const { data: session } = useSession();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [formData, setFormData] = useState({
-    prename: '',
+    vorname: '',
     name: '',
     email: session?.user?.email || '',
     courseName: '',
@@ -33,7 +33,7 @@ export default function KursePage() {
         if (data) {
           setFormData((prevFormData) => ({
             ...prevFormData,
-            prename: data.first_name,
+            firstname: data.first_name,
             name: data.last_name,
           }));
         } else if (error) {
@@ -114,7 +114,7 @@ export default function KursePage() {
     const content = `
       <h1>Neue Kursanmeldung</h1>
       <p>Es hat sich eine neue Person für einen Kurs angemeldet. Bitte melden Sie sich so bald wie möglich via E-Mail beim Schüler beziehungsweise bei der Schülerin.</p>
-      <p><strong>Vorname:</strong> ${formData.prename}</p>      
+      <p><strong>Vorname:</strong> ${formData.firstname}</p>      
       <p><strong>Name:</strong> ${formData.name}</p>
       <p><strong>E-Mail:</strong> ${formData.email}</p>
       <p><strong>Kurs:</strong> ${formData.courseName}</p>
@@ -201,12 +201,12 @@ export default function KursePage() {
             ) : (
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label htmlFor="vorname" className="block text-sm font-medium text-gray-700">Vorname</label>
+                  <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">Vorname</label>
                   <input
                     type="text"
-                    id="vorname"
-                    name="vorname"
-                    value={formData.vorname}
+                    id="firstname"
+                    name="firstname"
+                    value={formData.firstname}
                     onChange={handleChange}
                     required
                     className="mt-1 block w-full border p-2 rounded"
