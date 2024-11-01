@@ -7,7 +7,6 @@ import { InlineMath } from 'react-katex';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabaseClient';
 
-// Reisetabelle für Aufgabe 2
 const TravelTable = () => {
   return (
     <table className="min-w-full border-collapse border border-black text-center mt-4 mb-8">

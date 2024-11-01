@@ -2,14 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function ExamPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [tasks, setTasks] = useState([]);
   const [currentTask, setCurrentTask] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timer, setTimer] = useState(3600);
+
+  const userId = session?.user?.id;
 
   useEffect(() => {
     fetch('/api/mathematik_exam')
@@ -34,26 +39,77 @@ export default function ExamPage() {
     return () => clearInterval(countdown);
   }, [timer]);
 
+  const saveAnswersForTask = async () => {
+    if (!userId) return;
+
+    const taskQuestions = tasks[currentTask]?.questions || [];
+    for (const question of taskQuestions) {
+      const userAnswer = answers[question.id];
+      if (userAnswer === undefined) continue;
+
+      const isCorrect = userAnswer === question.solution;
+      try {
+        const { data, error } = await supabase
+          .from('user_exercises')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('question_id', question.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching answer:', error);
+          continue;
+        }
+
+        if (data) {
+          await supabase
+            .from('user_exercises')
+            .update({
+              exercise_type: 'exam',
+              user_answer: userAnswer,
+              is_correct: isCorrect,
+              question: question.question,
+            })
+            .eq('id', data.id);
+        } else {
+          await supabase.from('user_exercises').insert({
+            user_id: userId,
+            exercise_type: 'exam',
+            question_id: question.id,
+            question: question.question,
+            user_answer: userAnswer,
+            is_correct: isCorrect,
+          });
+        }
+      } catch (error) {
+        console.error('Error saving answer:', error);
+      }
+    }
+  };
+
   const handleAnswerChange = (questionId, answer) => {
-    setAnswers(prevAnswers => ({
+    setAnswers((prevAnswers) => ({
       ...prevAnswers,
       [questionId]: answer,
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    await saveAnswersForTask();
     if (currentTask < tasks.length - 1) {
-      setCurrentTask(prev => prev + 1);
+      setCurrentTask((prev) => prev + 1);
     }
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    await saveAnswersForTask();
     if (currentTask > 0) {
-      setCurrentTask(prev => prev - 1);
+      setCurrentTask((prev) => prev - 1);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    await saveAnswersForTask();
     console.log('Exam submitted:', answers);
     router.push('/pruefung/abgabe');
   };
@@ -118,20 +174,21 @@ export default function ExamPage() {
         </div>
       </div>
 
-      {/* Taskliste innerhalb der Aufgaben */}
+      {/* Auflistung der Aufgaben */}
       <div className="mb-6 flex space-x-4 overflow-x-auto">
         {tasks.map((task, index) => {
           const isCurrentTask = currentTask === index;
-          const isAnswered = task.questions.every(q => answers[q.id]);
+          const isAnswered = task.questions.every((q) => answers[q.id]);
           return (
             <button
               key={task.task_id}
-              onClick={() => setCurrentTask(index)}
-              className={`p-2 rounded 
-                ${isCurrentTask ? 'bg-[#006489] text-white' : ''}
-                ${isAnswered && !isCurrentTask ? 'bg-[#003f56] text-white' : ''}
-                ${!isAnswered && !isCurrentTask ? 'bg-gray-200' : ''}
-                hover:bg-[#006489] transition-colors`}
+              onClick={async () => {
+                await saveAnswersForTask();
+                setCurrentTask(index);
+              }}
+              className={`p-2 rounded ${isCurrentTask ? 'bg-[#006489] text-white' : ''} ${
+                isAnswered && !isCurrentTask ? 'bg-[#003f56] text-white' : ''
+              } ${!isAnswered && !isCurrentTask ? 'bg-gray-200' : ''} hover:bg-[#006489] transition-colors`}
             >
               {index + 1}
             </button>
@@ -144,35 +201,21 @@ export default function ExamPage() {
           <h2 className="text-xl font-bold text-[#003f56] mb-6">{tasks[currentTask].title}</h2>
           <h3 className="text-black font-semibold mb-6">{tasks[currentTask].subtitle}</h3>
 
-          {/* Rendert Bilder für Aufgabe 7 und Aufgabe 8 */}
-          {tasks[currentTask].task_id === "task_7" && (
-            <Image
-              src="/Aufgabe 7.png"
-              alt="Aufgabe 7 Bild"
-              width={350}
-              height={210}
-              className="mb-6"
-            />
+          {/* Bilder für Aufgaben 7 und 8 */}
+          {tasks[currentTask].task_id === 'task_7' && (
+            <Image src="/Aufgabe 7.png" alt="Aufgabe 7 Bild" width={350} height={210} className="mb-6" />
           )}
-          {tasks[currentTask].task_id === "task_8" && (
-            <Image
-              src="/Aufgabe 8.png"
-              alt="Aufgabe 8 Bild"
-              width={200}
-              height={120}
-              className="mb-6"
-            />
+          {tasks[currentTask].task_id === 'task_8' && (
+            <Image src="/Aufgabe 8.png" alt="Aufgabe 8 Bild" width={200} height={120} className="mb-6" />
           )}
 
-          {/* Rendert Preistabelle für die zweite Aufgabe */}
-          {tasks[currentTask].task_id === "task_2" && renderPriceTable()}
+          {/* Preistabelle für Aufgabe 2 */}
+          {tasks[currentTask].task_id === 'task_2' && renderPriceTable()}
 
           {tasks[currentTask].questions.map((question) => (
             <div key={question.id} className="mb-6">
               <p className="text-base font-normal mb-2">{question.question}</p>
-              {question.formula && (
-                <p className="text-base italic text-black mb-2">{question.formula}</p>
-              )}
+              {question.formula && <p className="text-base italic text-black mb-2">{question.formula}</p>}
               <textarea
                 className="w-full p-2 border border-gray-300 rounded"
                 rows="2"
@@ -185,7 +228,7 @@ export default function ExamPage() {
         </div>
       )}
 
-      {/* Navigation innerhalb der Aufgaben */}
+      {/* Navigation innerhalb der Aufgaben*/}
       <div className="flex justify-between">
         <div className="w-1/2">
           {currentTask > 0 ? (

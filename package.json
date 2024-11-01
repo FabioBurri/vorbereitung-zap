@@ -19,8 +19,10 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.15",
     "react": "^18",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18",
     "react-katex": "^3.0.1",
+    "react-use": "^17.5.1",
     "resend": "^4.0.0",
     "uuid": "^10.0.0"
   },

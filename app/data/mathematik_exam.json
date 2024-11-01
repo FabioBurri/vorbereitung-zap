@@ -10,9 +10,8 @@
             {
               "id": 20,
               "question": "Welche Zahl muss du eingeben, damit die Ausgabezahl 102 herauskommt?",
-              "formula": "1. Eingabe: + 6.3, 2. Eingabe: /3, 3. Eingabe: - 20.1",
+              "formula": "1. Eingabe: + 6.3, 2. Eingabe: / 3, 3. Eingabe: - 20.1",
               "type": "numeric",
-              "hint": "Versuche, die Gleichung nach x aufzulösen.",
               "solution": "360"
             }
           ]
@@ -20,7 +19,7 @@
         {
           "task_id": "task_2",
           "title": "2. Aufgabe",
-          "subtitle": "Bootsvermietung «Am See». Öffnungszeiten: Mai bis September täglich (Mo bis So) von 8:30 bis 19:00 Uhr",
+          "subtitle": "Bootsvermietung «Am See». Öffnungszeiten: Mai bis September täglich (Mo bis So) von 8:30 bis 19:00 Uhr.",
           "questions": [
             {
               "id": 21,
@@ -30,13 +29,13 @@
             },
             {
               "id": 22,
-              "question": "Wie viele Kajaks besitzt der Vermieter, wenn er mit allen Kajaks pro Tag maximal 1040.- CHF verdienen kann?",
+              "question": "Wie viele Kajaks besitzt der Vermieter, wenn er mit allen Kajaks pro Tag maximal 1040.- Franken verdienen kann?",
               "type": "numeric",
               "solution": "8"
             },
             {
               "id": 23,
-              "question": "Ein Pdealo wird während der ganzen Öffnungszeit am Sonntag ununterbrochen jedesmal für 30 Minuten, ein anderes Pedalo ununterbrochen jedesmal für 60 Minuten vermietet. Wie gross ist der Unterschied auf den Einnahmen für diese beides Pedalos?",
+              "question": "Ein Pedalo wird während der ganzen Öffnungszeit am Sonntag ununterbrochen jedesmal für 30 Minuten, ein anderes Pedalo ununterbrochen jedesmal für 60 Minuten vermietet. Wie gross ist der Unterschied auf den Einnahmen für diese beides Pedalos?",
               "type": "numeric",
               "solution": "65"
             }
