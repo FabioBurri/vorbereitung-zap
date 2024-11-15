@@ -1,4 +1,14 @@
+// Badges - Logik anpassen. Ideen für Badges: Kurs gebucht, alle Übungen abgeschlossen (DE, Math, beide), Prüfung bestanden, Profil geupdated
+// Badges besser designen
+// Design generell anpassen
+
 // OAuth Integration in Supabase
 // Favicon
 // Update Readme
 // Doku schreiben
+
+
+
+// Mögliche Todos:
+
+// Antworten validieren wie 4 Meter in nummerischen Wert 4 umwandeln, Case sensitivity, leveraging fuzzy to 80%
