@@ -9,7 +9,7 @@ import Image from 'next/image';
 export default function DashboardPage() {
   const [userName, setUserName] = useState('');
   const [correctExercises, setCorrectExercises] = useState(0);
-  const totalExercises = 18; // Maximal richtige Anzahl an Übungen (Deutschübung mit ID 6 kann nicht richtig/falsch sein)
+  const totalExercises = 22;
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header Bild and Titel */}
+      {/* Header Bild und Titel */}
       <div className="relative w-full h-[400px]">
         <Image
           src="/dashboard.jpeg"

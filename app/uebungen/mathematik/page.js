@@ -123,7 +123,7 @@ export default function MathematikPage() {
             .select('id')
             .eq('user_id', userId)
             .eq('question_id', task.id)
-            .single();
+            .maybeSingle();
 
           if (data) {
             await supabase
@@ -236,10 +236,10 @@ export default function MathematikPage() {
                 </p>
 
                 {/* Bilder für Aufgabe 3 */}
-                {task.id === 14 && (
+                {task.id === 17 && (
                   <Image className="my-6" src="/Aufgabe 3a1.png" alt="Aufgabe 3a1" width={300} height={300} />
                 )}
-                {task.id === 15 && (
+                {task.id === 18 && (
                   <Image className="my-6" src="/Aufgabe 3a2.png" alt="Aufgabe 3a2" width={300} height={300} />
                 )}
 

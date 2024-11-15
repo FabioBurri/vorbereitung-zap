@@ -8,7 +8,7 @@
           "title": "1. Aufgabe",
           "tasks": [
             {
-              "id": 9,
+              "id": 12,
               "question": "Löse die folgende Gleichung:",
               "formula": "2 \\cdot x \\, \\text{kg} + 536 \\, \\text{kg} = 1.24 \\, \\text{t}",
               "solution": "360",
@@ -16,7 +16,7 @@
               "hint": "Formel vereinfachen und x berechnen."
             },
             {
-              "id": 10,
+              "id": 13,
               "question": "Löse die folgende Gleichung:",
               "formula": "\\frac{5}{9} \\cdot 2h33min - x \\text{ min} = \\frac{3}{5}h",
               "solution": "49",
@@ -32,21 +32,21 @@
           "table": true,
           "tasks": [
             {
-              "id": 11,
+              "id": 14,
               "question": "Der schnellste Weg mit dem Zug von Zürich nach Brüssel führt über Paris. Wie weit ist demnach die Distanz von Paris nach Brüssel mit dem Zug?",
               "solution": "273",
               "type": "numeric",
               "hint": "Vergleiche die Distanzen."
             },
             {
-              "id": 12,
+              "id": 15,
               "question": "Wie viele km/h beträgt die Durchschnittsgeschwindigkeit eines Fluges von Zürich nach Brüssel?",
               "solution": "400",
               "type": "numeric",
               "hint": "Errechne die absolvierenden Kilometer auf 60 Minuten."
             },
             {
-              "id": 13,
+              "id": 16,
               "question": "Wie viele Minuten könnte ein Auto auf der Fahrt von Zürich nach Brüssel einsparen, wenn es gleich schnell fahren könnte wie ein Auto auf der Fahrt von Zürich nach Paris?",
               "solution": "40",
               "type": "numeric",
@@ -60,14 +60,14 @@
           "subtitle": "Du siehst zwei Abbildungen mit Rechtecken, deren Seiten auf den Linien der Häuschen liegen. Darin ist je eine Figur grau eingezeichnet. Gib deine Antwort wie folgt an: Zähler/Nenner",
           "tasks": [
             {
-              "id": 14,
+              "id": 17,
               "question": "Welchem Bruchteil des Rechtecks entspricht der graue Teil?",
               "solution": "4/15",
               "type": "numeric",
               "hint": "Zähle die Häuschen."
             },
             {
-              "id": 15,
+              "id": 18,
               "question": "Welchem Bruchteil des Rechtecks entspricht der graue Teil?",
               "solution": "1/2",
               "type": "numeric",
@@ -81,28 +81,28 @@
           "subtitle": "Sind die folgenden Aussagen richtig oder falsch? Setze das Kreuz bei richtig oder falsch.",
           "tasks": [
             {
-              "id": 16,
+              "id": 19,
               "question": "Richtig oder falsch?",
               "formula": "90 \\cdot 568.1 = 100 \\cdot 568.1 - 10 \\cdot 568.1",
               "solution": "true",
               "type": "bool"
             },
             {
-              "id": 17,
+              "id": 20,
               "question": "Richtig oder falsch?",
               "formula": "7895.21 - 168.7 + 31.3 = 7895.21 - 200",
               "solution": "false",
               "type": "bool"
             },
             {
-              "id": 18,
+              "id": 21,
               "question": "Richtig oder falsch?",
               "formula": "89.65 \\cdot 6.3 = 6.3 \\cdot 89.65",
               "solution": "true",
               "type": "bool"
             },
             {
-              "id": 19,
+              "id": 22,
               "question": "Richtig oder falsch?",
               "formula": "\\frac{871.9}{75} \\div 3 = \\frac{871.9}{25}",
               "solution": "false",

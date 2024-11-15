@@ -37,21 +37,11 @@ export default function DeutschPage() {
     }
   }, [userId]);
 
-  const handleInputChange = (e, id, subIndex = null) => {
-    if (subIndex !== null) {
-      setUserAnswers({
-        ...userAnswers,
-        [id]: {
-          ...(userAnswers[id] || {}),
-          [subIndex]: e.target.value,
-        },
-      });
-    } else {
-      setUserAnswers({
-        ...userAnswers,
-        [id]: e.target.value,
-      });
-    }
+  const handleInputChange = (e, id) => {
+    setUserAnswers({
+      ...userAnswers,
+      [id]: e.target.value,
+    });
   };
 
   const handleCheckAnswers = async () => {
@@ -60,46 +50,53 @@ export default function DeutschPage() {
     if (userId) {
       for (const aufgabe of exercises.uebungen.deutsch.aufgaben) {
         for (const task of aufgabe.tasks) {
-          if (task.id === 6) {
-            for (let i = 1; i <= 4; i++) {
-              const inputKey = `aufgabe_3_${i}`;
-              currentResults[inputKey] = false;
-              await supabase.from('user_exercises').insert({
-                user_id: userId,
-                exercise_type: 'deutsch',
-                question_id: task.id,
+          const userAnswer = userAnswers[task.id];
+  
+          const isCorrect = task.type === 'multiple_choice'
+            ? userAnswer === task.solution
+            : userAnswer === task.solution;
+  
+          currentResults[task.id] = isCorrect;
+  
+          const { data: existingEntry, error: fetchError } = await supabase
+            .from('user_exercises')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('exercise_type', 'deutsch')
+            .eq('question_id', task.id)
+            .maybeSingle();
+  
+          if (fetchError && fetchError.code !== 'PGRST116') {
+            console.error(`Error checking entry for task ${task.id}:`, fetchError);
+            continue;
+          }
+  
+          if (existingEntry) {
+            const { error: updateError } = await supabase
+              .from('user_exercises')
+              .update({
                 question: task.question,
-                user_answer: userAnswers[inputKey] || '',
-                is_correct: null,
-              });
-            }
-          } else if (task.id === 8) {
-            task.options.forEach(async (option, index) => {
-              const optionKey = `option_${index}`;
-              const isCorrect = userAnswers[optionKey] === option.solution;
-              currentResults[optionKey] = isCorrect;
-  
-              await supabase.from('user_exercises').insert({
-                user_id: userId,
-                exercise_type: 'deutsch',
-                question_id: task.id,
-                question: option.text,
-                user_answer: userAnswers[optionKey] || '',
+                user_answer: userAnswer || '',
                 is_correct: isCorrect,
-              });
-            });
-          } else {
-            const isCorrect = userAnswers[task.id] === task.solution;
-            currentResults[task.id] = isCorrect;
+              })
+              .eq('id', existingEntry.id);
   
-            await supabase.from('user_exercises').insert({
+            if (updateError) {
+              console.error(`Error updating entry for task ${task.id}:`, updateError);
+            }
+          } else {
+            const { error: insertError } = await supabase.from('user_exercises').insert({
               user_id: userId,
               exercise_type: 'deutsch',
               question_id: task.id,
               question: task.question,
-              user_answer: userAnswers[task.id] || '',
+              user_answer: userAnswer || '',
               is_correct: isCorrect,
             });
+  
+            if (insertError) {
+              console.error(`Error inserting entry for task ${task.id}:`, insertError);
+            }
           }
         }
       }
@@ -109,14 +106,17 @@ export default function DeutschPage() {
     setChecked(true);
   };
   
-
   const handleClearAll = async () => {
     if (userId) {
-      await supabase
+      const { error } = await supabase
         .from('user_exercises')
         .delete()
         .eq('user_id', userId)
         .eq('exercise_type', 'deutsch');
+
+      if (error) {
+        console.error('Error clearing data:', error);
+      }
     }
 
     setUserAnswers({});
@@ -228,114 +228,67 @@ export default function DeutschPage() {
         {exercises.uebungen.deutsch.aufgaben.map((aufgabe) => (
           <div key={aufgabe.id} className="mb-10">
             <h3 className="text-[#003f56] font-semibold mb-4 text-xl">{aufgabe.title}</h3>
+            {aufgabe.id === 'aufgabe_5' && aufgabe.subtitle && (
+              <p className="text-base mb-4">{aufgabe.subtitle}</p>
+            )}
+
             {aufgabe.tasks.map((task) => (
               <div key={task.id} className="mb-6">
-                <p className="text-black text-base mb-2">{task.question}</p>
+                {aufgabe.id !== 'aufgabe_5' && (
+                  <>
+                    <p className="text-black text-base mb-2">{task.question}</p>
+                    <div className="flex items-center mb-4">
+                      <input
+                        type="text"
+                        value={userAnswers[task.id] || ''}
+                        onChange={(e) => handleInputChange(e, task.id)}
+                        className="border p-2 rounded w-1/2"
+                        placeholder="Deine Antwort"
+                      />
+                      <button
+                        onClick={() => handleToggleHint(task.id)}
+                        className="ml-2 bg-[#003f56] hover:bg-[#004f66] text-white px-3 py-2 rounded-lg flex items-center"
+                      >
+                        <Image src="/gluhbirne_weiss.png" alt="Hint" width={24} height={24} />
+                      </button>
+                    </div>
+                  </>
+                )}
 
-                {/* Aufgabe 5 */}
-                {task.id === 8 ? (
-                  <div className="grid grid-cols-1 gap-2">
-                    {task.options.map((option, index) => (
-                      <div key={index} className="mb-4">
-                        <p
-                          className="text-black text-base mb-2"
-                          dangerouslySetInnerHTML={{
-                            __html: option.text.replace('schlenderte', '<strong>schlenderte</strong>')
-                                              .replace('gleichgültig', '<strong>gleichgültig</strong>')
-                                              .replace('zerrissene', '<strong>zerrissene</strong>')
-                                              .replace('sanft', '<strong>sanft</strong>')
-                                              .replace('distanziert', '<strong>distanziert</strong>'),
-                          }}
-                        />
-                        <div className="grid grid-cols-1 gap-2">
-                          {option.answers.map((answer, answerIndex) => (
-                            <label key={answerIndex} className="flex items-center space-x-2">
-                              <input
-                                type="radio"
-                                name={`option_${index}`}
-                                value={answer}
-                                checked={userAnswers[`option_${index}`] === answer}
-                                onChange={(e) => handleInputChange(e, `option_${index}`)}
-                                className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm 
-                                          checked:bg-[#003f56] checked:border-[#003f56] 
-                                          focus:outline-none focus:ring-2 focus:ring-[#003f56] 
-                                          checked:after:content-['✓'] checked:after:text-white 
-                                          checked:after:text-center checked:after:inline-block 
-                                          checked:after:w-full checked:after:h-full 
-                                          checked:after:leading-none checked:after:pt-[2px] flex justify-center items-center"
-                              />
-                              <span className="text-black">{answer}</span>
-                            </label>
-                          ))}
-                        </div>
-                        {checked && (
-                          <p className={`mt-2 ${userAnswers[`option_${index}`] === option.solution ? 'text-green-500' : 'text-red-500'}`}>
-                            {userAnswers[`option_${index}`] === option.solution
-                              ? 'Richtig'
-                              : `Falsch, die richtige Antwort ist: ${option.solution}`}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : task.type === 'text' ? ( 
-                  <div className="flex items-center mb-4">
-                    <input
-                      type="text"
-                      value={userAnswers[task.id] || ''}
-                      onChange={(e) => handleInputChange(e, task.id)}
-                      className="border p-2 rounded w-1/2"
-                      placeholder="Deine Antwort"
+                {aufgabe.id === 'aufgabe_5' && task.type === 'multiple_choice' && (
+                  <>
+                    <p
+                      className="text-base mb-4"
+                      dangerouslySetInnerHTML={{
+                        __html: task.question
+                          .replace('schlenderte', '<strong>schlenderte</strong>')
+                          .replace('gleichgültig', '<strong>gleichgültig</strong>')
+                          .replace('zerrissene', '<strong>zerrissene</strong>')
+                          .replace('sanft', '<strong>sanft</strong>')
+                          .replace('distanziert', '<strong>distanziert</strong>'),
+                      }}
                     />
-                    {/* Hinweise */}
-                    <button
-                      onClick={() => handleToggleHint(task.id)}
-                      className="ml-2 bg-[#003f56] hover:bg-[#004f66] text-white px-3 py-2 rounded-lg flex items-center"
-                    >
-                      <Image src="/gluhbirne_weiss.png" alt="Hint" width={24} height={24} />
-                    </button>
-                  </div>
-                ) : null}
-
-                {/* Aufgabe 3 */}
-                {task.id === 6 && (
-                  <div className="mb-10">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {[1, 2, 3, 4].map((num) => (
-                        <input
-                          key={num}
-                          type="text"
-                          value={userAnswers[`aufgabe_3_${num}`] || ''}
-                          onChange={(e) => handleInputChange(e, `aufgabe_3_${num}`)}
-                          className="border p-2 rounded w-full"
-                          placeholder={`Antwort ${num}`}
-                        />
+                    <div className="grid grid-cols-1 gap-2 mb-6">
+                      {(task.options || []).map((option, index) => (
+                        <label key={index} className="flex items-center space-x-4">
+                          <input
+                            type="radio"
+                            name={`task-${task.id}`}
+                            value={option}
+                            checked={userAnswers[task.id] === option}
+                            onChange={(e) => handleInputChange(e, task.id)}
+                            className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm checked:bg-[#003f56]"
+                          />
+                          <span className="text-black">{option}</span>
+                        </label>
                       ))}
                     </div>
-
-                    {/* Mögliche Antworten */}
-                    {checked && (
-                      <div className="mt-4">
-                        <h4 className="text-[#003f56] font-semibold mb-2">Mögliche Antworten:</h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          <li>schwächere Umarmung / drückt weniger bei Umarmung</li>
-                          <li>Ausrede / angeblich wenig Zeit / muss weiter</li>
-                          <li>leise Stimme, als ob sie Merals Ohren schonen wolle</li>
-                          <li>verlegenes Lächeln</li>
-                          <li>sie wiederholt ihre Ausrede zur Zeitknappheit</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                  </>
                 )}
 
-                {/* Hinweis */}
-                {task.id !== 6 && task.id !== 8 && showHint[task.id] && (
-                  <p className="text-gray-600 text-sm mt-2">{task.hint}</p>
-                )}
+                {showHint[task.id] && <p className="text-gray-600 text-sm mt-2">{task.hint}</p>}
 
-                {/* Feedback */}
-                {checked && task.id !== 6 && task.id !== 8 && (
+                {checked && (
                   <p className={`mt-2 ${results[task.id] ? 'text-green-500' : 'text-red-500'}`}>
                     {results[task.id]
                       ? 'Richtig'
@@ -347,7 +300,6 @@ export default function DeutschPage() {
           </div>
         ))}
 
-        {/* Prüfen und Eingabe-löschen-Button */}
         <div className="flex gap-4">
           <button
             onClick={handleCheckAnswers}
