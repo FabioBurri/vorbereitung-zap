@@ -51,8 +51,8 @@
           ]
         },
         {
-          "id": "aufgabe_4",
-          "title": "Aufgabe 4",
+          "id": "aufgabe_3",
+          "title": "Aufgabe 3",
           "tasks": [
             {
               "id": 6,
@@ -64,8 +64,8 @@
           ]
         },
         {
-          "id": "aufgabe_5",
-          "title": "Aufgabe 5",
+          "id": "aufgabe_4",
+          "title": "Aufgabe 4",
           "subtitle": "Welches Synonym beschreibt das fett gedruckte Wort deiner Meinung nach am besten?",
           "tasks": [
             {

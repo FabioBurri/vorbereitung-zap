@@ -1,9 +1,10 @@
-// Badges - Logik anpassen. Ideen für Badges: Kurs gebucht, alle Übungen abgeschlossen (DE, Math, beide), Prüfung bestanden, Profil geupdated
-// Badges besser designen
-// Design generell anpassen
+// Multiple-Choice-Style bei Deutsch, Aufgabe 4 analog Math designen
+// Erreichter Badge soll nicht geändert/gelöscht werden
+// Prüfung soll nicht zum Progress Circle mitzählen
+// Prüfungsantworten sollen gespeichert werden, man soll später auswählen können, ob man die Prüfung neustarten oder nur ansehen möchte
+// Gelbe Hinweise in den DevTools lösen
 
 // OAuth Integration in Supabase
-// Favicon
 // Update Readme
 // Doku schreiben
 
@@ -12,3 +13,4 @@
 // Mögliche Todos:
 
 // Antworten validieren wie 4 Meter in nummerischen Wert 4 umwandeln, Case sensitivity, leveraging fuzzy to 80%
+// Fehler durchgehen

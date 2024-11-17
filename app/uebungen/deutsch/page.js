@@ -228,13 +228,13 @@ export default function DeutschPage() {
         {exercises.uebungen.deutsch.aufgaben.map((aufgabe) => (
           <div key={aufgabe.id} className="mb-10">
             <h3 className="text-[#003f56] font-semibold mb-4 text-xl">{aufgabe.title}</h3>
-            {aufgabe.id === 'aufgabe_5' && aufgabe.subtitle && (
+            {aufgabe.id === 'aufgabe_4' && aufgabe.subtitle && (
               <p className="text-base mb-4">{aufgabe.subtitle}</p>
             )}
 
             {aufgabe.tasks.map((task) => (
               <div key={task.id} className="mb-6">
-                {aufgabe.id !== 'aufgabe_5' && (
+                {aufgabe.id !== 'aufgabe_4' && (
                   <>
                     <p className="text-black text-base mb-2">{task.question}</p>
                     <div className="flex items-center mb-4">
@@ -255,7 +255,7 @@ export default function DeutschPage() {
                   </>
                 )}
 
-                {aufgabe.id === 'aufgabe_5' && task.type === 'multiple_choice' && (
+                {aufgabe.id === 'aufgabe_4' && task.type === 'multiple_choice' && (
                   <>
                     <p
                       className="text-base mb-4"
