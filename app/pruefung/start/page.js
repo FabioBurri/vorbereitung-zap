@@ -32,7 +32,7 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (timer <= 0) {
-      handleSubmit();
+      handleSubmit(); // Auto-submit when time runs out
       return;
     }
     const countdown = setInterval(() => setTimer((prev) => prev - 1), 1000);
@@ -110,8 +110,7 @@ export default function ExamPage() {
 
   const handleSubmit = async () => {
     await saveAnswersForTask();
-    console.log('Exam submitted:', answers);
-    router.push('/pruefung/abgabe');
+    router.push('/pruefung/abgabe'); // Navigate to results page
   };
 
   const formatTime = (time) => {

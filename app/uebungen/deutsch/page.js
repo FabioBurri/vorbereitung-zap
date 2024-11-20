@@ -277,9 +277,13 @@ export default function DeutschPage() {
                             value={option}
                             checked={userAnswers[task.id] === option}
                             onChange={(e) => handleInputChange(e, task.id)}
-                            className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm checked:bg-[#003f56]"
+                            className="appearance-none h-5 w-5 border-2 border-[#003f56] rounded-sm checked:bg-[#003f56] checked:border-[#003f56]
+                                      focus:outline-none focus:ring-2 focus:ring-[#003f56]
+                                      checked:after:content-['✓'] checked:after:text-white checked:after:text-center 
+                                      checked:after:inline-block checked:after:w-full checked:after:h-full checked:after:leading-none 
+                                      flex justify-center items-center"
                           />
-                          <span className="text-black">{option}</span>
+                          <span className="text-black ml-2">{option}</span>
                         </label>
                       ))}
                     </div>

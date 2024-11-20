@@ -99,7 +99,6 @@ export default function DashboardPage() {
       const userId = session?.user?.id;
       if (!userId) return;
 
-      // Check if badge already exists
       const { data: existingBadges, error: fetchError } = await supabase
         .from('user_badges')
         .select('badge_name')
@@ -112,7 +111,6 @@ export default function DashboardPage() {
       }
 
       if (!existingBadges || existingBadges.length === 0) {
-        // Insert badge if it doesn't exist
         const { error: insertError } = await supabase.from('user_badges').insert({
           user_id: userId,
           badge_name: badgeName,
@@ -153,13 +151,14 @@ export default function DashboardPage() {
         const { data: userExercises, error: exerciseError } = await supabase
           .from('user_exercises')
           .select('question_id, is_correct, exercise_type')
-          .eq('is_correct', true);
-
+          .eq('is_correct', true)
+          .in('exercise_type', ['mathematik', 'deutsch']);
+    
         if (exerciseError) {
           console.error('Error fetching exercises:', exerciseError);
           return;
         }
-
+    
         const uniqueCorrectAnswers = userExercises.reduce((unique, exercise) => {
           if (
             exercise.is_correct &&
@@ -169,10 +168,10 @@ export default function DashboardPage() {
           }
           return unique;
         }, []);
-
+    
         setCorrectExercises(uniqueCorrectAnswers.length);
 
-        // Badge Logic
+        // Badge Logik
         const mathCompleted =
           uniqueCorrectAnswers.filter((task) => task.exercise_type === 'mathematik').length === 11;
         const germanCompleted =
@@ -207,7 +206,6 @@ export default function DashboardPage() {
           profile?.last_name &&
           profile?.avatar_url;
 
-        // Save earned badges
         const newBadges = [];
         if (mathCompleted) {
           newBadges.push('Leonhard Euler');
@@ -283,7 +281,7 @@ export default function DashboardPage() {
 
       <div className="container mx-auto p-6 mt-12">
         {/* Begrüssung */}
-        <h2 className="text-3xl font-semibold mb-8">Hallo, {userName}</h2>
+        <h2 className="text-3xl font-semibold text-[#003f56] mb-8">Hallo, {userName}</h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Fortschrittsanzeige */}
@@ -306,7 +304,7 @@ export default function DashboardPage() {
 
           {/* Badges */}
           <div className="flex flex-col items-start space-y-4">
-            <h2 className="text-2xl font-semibold">Abzeichen</h2>
+            <h2 className="text-2xl font-semibold text-[#003f56]">Abzeichen</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {Object.keys(badgeInfo).map((badge) => {
                 const isEarned = earnedBadges.includes(badge);

@@ -6,9 +6,11 @@ import { supabase } from '../../lib/supabaseClient';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import examData from '../../data/mathematik_exam.json';
+import { useRouter } from 'next/navigation';
 
 export default function ResultsPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [grade, setGrade] = useState(0);
   const [showResults, setShowResults] = useState(false);
@@ -17,7 +19,7 @@ export default function ResultsPage() {
   const { width, height } = useWindowSize();
 
   const userId = session?.user?.id;
-  const totalQuestions = 14;
+  const totalQuestions = examData.exam.tasks.reduce((acc, task) => acc + task.questions.length, 0);
 
   useEffect(() => {
     if (userId) {
@@ -34,7 +36,7 @@ export default function ResultsPage() {
         }
 
         const questions = examData.exam.tasks.flatMap((task) => task.questions);
-        
+
         const mergedAnswers = questions.map((question) => {
           const userAnswer = userAnswers.find((ua) => ua.question_id === question.id);
           return {
@@ -50,7 +52,6 @@ export default function ResultsPage() {
         setGrade((correctCount / totalQuestions) * 5 + 1);
         setAnswers(mergedAnswers);
 
-        {/* Konfetti bei einer Note 4 oder höher, stoppt nach zehn Sekunden */}
         if ((correctCount / totalQuestions) * 5 + 1 >= 4) {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 10000);
@@ -63,6 +64,23 @@ export default function ResultsPage() {
 
   const toggleShowResults = () => {
     setShowResults((prev) => !prev);
+  };
+
+  const handleRestartExam = async () => {
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from('user_exercises')
+      .delete()
+      .eq('user_id', userId)
+      .eq('exercise_type', 'exam');
+
+    if (error) {
+      console.error('Error deleting exam data:', error);
+      return;
+    }
+
+    router.push('/pruefung/start');
   };
 
   return (
@@ -85,13 +103,21 @@ export default function ResultsPage() {
           </p>
         )}
 
-        {/* Button für Antworten (verbergen) */}
-        <button
-          onClick={toggleShowResults}
-          className="mt-4 px-4 py-2 bg-[#003f56] text-white rounded hover:bg-[#004f66] transition-colors"
-        >
-          {showResults ? "Antworten verbergen" : "Meine Antworten"}
-        </button>
+        {/* Buttons */}
+        <div className="flex space-x-4 mt-4">
+          <button
+            onClick={toggleShowResults}
+            className="px-4 py-2 bg-[#003f56] text-white rounded hover:bg-[#004f66] transition-colors"
+          >
+            {showResults ? "Antworten verbergen" : "Meine Antworten"}
+          </button>
+          <button
+            onClick={handleRestartExam}
+            className="px-4 py-2 bg-[#003f56] text-white rounded hover:bg-[#004f66] transition-colors"
+          >
+            Test neustarten
+          </button>
+        </div>
 
         {/* Antworten */}
         {showResults && (
@@ -100,7 +126,7 @@ export default function ResultsPage() {
             {answers.map((answer, index) => (
               <div key={index} className="mb-6">
                 <p className="text-base font-semibold">
-                  {answer.question}
+                  {index + 1}. {answer.question}
                 </p>
                 <p className="text-base">
                   Deine Antwort: {answer.user_answer}
