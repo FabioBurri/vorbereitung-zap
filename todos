@@ -1,11 +1,10 @@
-// Erreichter Badge soll nicht geändert/gelöscht werden
-// Badges sollen userabhängig sein
 // Gelbe Hinweise in den DevTools lösen
 
 // OAuth Integration in Supabase / Register page braucht ebenfalls OAuth
 // Update Readme
-// Doku schreiben
 // Unnötiges löschen
+// Slow loading anschauen
+// CSS Problems ansehen
 
 
 

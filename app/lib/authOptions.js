@@ -29,7 +29,7 @@ export const authOptions = {
         if (error || !data.user) {
           throw new Error('InvalidCredentials');
         }
-
+    
         return { id: data.user.id, email: data.user.email };
       },
     }),
@@ -54,3 +54,5 @@ export const authOptions = {
     },
   },
 };
+
+

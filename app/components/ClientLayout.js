@@ -1,13 +1,17 @@
 'use client';
 
-import SessionProviderWrapper from "./SessionProviderWrapper";
+import { SessionProvider } from 'next-auth/react';
 import Navbar from "./Navbar";
 
-export default function ClientLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
-    <SessionProviderWrapper>
-      <Navbar />
-      <main>{children}</main>
-    </SessionProviderWrapper>
+    <html lang="de">
+      <body>
+        <SessionProviderWrapper>
+          <Navbar />
+            <main>{children}</main>
+        </SessionProviderWrapper>
+      </body>
+    </html>
   );
 }

@@ -2,8 +2,20 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function HomePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [session, status, router]);
+
   return (
     <main className="min-h-screen flex flex-col bg-gray-50">
       {/* Header Bild */}
@@ -22,11 +34,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Inhalt */}
       <div className="container mx-auto p-12">
         <div className="max-w-4xl mx-auto">
-
-          {/* Lead  */}
+          {/* Lead */}
           <p className="text-lg leading-relaxed mb-6">
             Die Lernplattform soll dir helfen, dich gezielt auf die Zentrale Aufnahmeprüfung vorzubereiten.
             Egal, ob du dich auf die Fächer Mathematik oder Deutsch konzentrieren möchtest - die Plattform
@@ -34,11 +45,11 @@ export default function HomePage() {
             Was dich erwartet:
           </p>
 
-          {/* Aufzählung */}
+          {/* Liste */}
           <ul className="space-y-4 mb-14">
-          <li className="flex items-start">
+            <li className="flex items-start">
               <span className="text-[#003f56] font-bold mr-3">•</span>
-              <span>Ein Lernen, das Spass macht.</span>
+              <span>Ein Lernen, das Spaß macht.</span>
             </li>
             <li className="flex items-start">
               <span className="text-[#003f56] font-bold mr-3">•</span>
@@ -61,12 +72,12 @@ export default function HomePage() {
           {/* Buttons */}
           <div className="flex space-x-4">
             <Link href="/register">
-              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer">
                 Jetzt registrieren
               </span>
             </Link>
             <Link href="/login">
-              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <span className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer">
                 Einloggen
               </span>
             </Link>

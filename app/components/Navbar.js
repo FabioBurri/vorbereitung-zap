@@ -6,15 +6,19 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    await signOut({
-      redirect: true,
-      callbackUrl: '/',
-    });
+    try {
+      await signOut({
+        redirect: true,
+        callbackUrl: '/',
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   return (
@@ -32,7 +36,7 @@ const Navbar = () => {
         </Link>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigationslinks */}
       <ul className="flex justify-end items-center space-x-8">
         {session ? (
           <>

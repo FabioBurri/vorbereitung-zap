@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [newProfilePic, setNewProfilePic] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const defaultProfilePicture = "https://cdn.pixabay.com/photo/2021/07/25/08/03/account-6491185_640.png";
 
   const userId = session?.user?.id;
@@ -20,13 +21,16 @@ export default function ProfilePage() {
   const titleName = firstName || session?.user?.email || 'User';
 
   useEffect(() => {
+    console.log('Fetching profile for user ID:', userId);
+
     if (userId) {
       const fetchProfile = async () => {
+        setLoading(true);
         const { data, error } = await supabase
           .from('profiles')
           .select('first_name, last_name, phone, avatar_url')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
         if (data) {
           setFirstName(data.first_name || '');
@@ -40,11 +44,18 @@ export default function ProfilePage() {
             
             setAvatarUrl(`${publicUrlData.publicUrl}?t=${new Date().getTime()}`);
           }
+        } else {
+          setFirstName('');
+          setLastName('');
+          setPhone('');
+          setAvatarUrl(defaultProfilePicture);
         }
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           console.error('Error fetching profile:', error.message);
+          alert(`Fehler beim Abrufen des Profils: ${error.message}`);
         }
+        setLoading(false);
       };
 
       fetchProfile();
@@ -57,26 +68,43 @@ export default function ProfilePage() {
     setSuccessMessage('');
 
     if (file && userId) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      const maxSize = 5 * 1024 * 1024;
+
+      if (!allowedTypes.includes(file.type)) {
+        alert('Nur JPEG und PNG Bilder sind erlaubt.');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert('Dateigröße darf 5MB nicht überschreiten.');
+        return;
+      }
+
+      const uniqueFileName = `${userId}-${Date.now()}-${file.name}`;
+      const filePath = `avatars/${userId}/${uniqueFileName}`;
+
       const { data: imageData, error: imageError } = await supabase
         .storage
         .from('avatars')
-        .upload(`public/${userId}`, file, {
+        .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true,
         });
 
       if (imageError) {
         console.log('Error uploading image:', imageError.message);
+        alert(`Error uploading image: ${imageError.message}`);
       } else {
         console.log('Image uploaded successfully:', imageData);
 
         const { data: updateData, error: updateError } = await supabase
           .from('profiles')
-          .update({ avatar_url: imageData.path })
-          .eq('id', userId);
+          .upsert({ id: userId, avatar_url: imageData.path }, { onConflict: 'id' });
 
         if (updateError) {
           console.log('Error updating profile with avatar URL:', updateError.message);
+          alert(`Error updating profile: ${updateError.message}`);
         } else {
           const { data: publicUrlData } = supabase
             .storage
@@ -84,6 +112,7 @@ export default function ProfilePage() {
             .getPublicUrl(imageData.path);
           
           setAvatarUrl(`${publicUrlData.publicUrl}?t=${new Date().getTime()}`);
+          setSuccessMessage('Profilbild erfolgreich aktualisiert.');
         }
       }
     }
@@ -92,10 +121,14 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!userId) {
       console.error("User ID is undefined. Cannot update profile.");
+      alert("Fehler: Benutzer-ID nicht gefunden.");
       return;
     }
 
+    setLoading(true);
+
     const userData = {
+      id: userId,
       first_name: firstName,
       last_name: lastName,
       phone: phone,
@@ -103,14 +136,16 @@ export default function ProfilePage() {
 
     const { data, error } = await supabase
       .from('profiles')
-      .upsert({ ...userData, id: userId })
-      .eq('id', userId);
+      .upsert(userData, { onConflict: 'id' });
 
     if (error) {
       console.log('Error updating profile:', error.message);
+      alert(`Fehler beim Aktualisieren des Profils: ${error.message}`);
     } else {
       setSuccessMessage('Dein Profil wurde aktualisiert.');
     }
+
+    setLoading(false);
   };
 
   const handleInputChange = (setter) => (e) => {
@@ -136,7 +171,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Inhalt */}
       <div className="container mx-auto p-12">
         <div className="flex justify-between items-center max-w-4xl mx-auto mb-12 relative">
           <h1 className="text-3xl font-bold text-[#003f56]">Hallo, {titleName}</h1>
@@ -163,7 +198,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Input Felder */}
+        {/* Inputfelder */}
         <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
           <div className="col-span-1">
             <label className="text-lg text-[#003f56]">Vorname</label>
@@ -213,11 +248,12 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               className="bg-[#003f56] hover:bg-[#004f66] transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
+              disabled={loading}
             >
-              Speichern
+              {loading ? 'Speichern...' : 'Speichern'}
             </button>
 
-            {/* Erfolgreiches Speichern */}
+            {/* Erfolgsmeldung */}
             {successMessage && (
               <p className="text-black-600 mt-4">{successMessage}</p>
             )}

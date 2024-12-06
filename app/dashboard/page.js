@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useSession } from 'next-auth/react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Image from 'next/image';
-import 'tippy.js/dist/tippy.css';
 import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
+import { supabase } from '../lib/supabaseClient';
+import Link from 'next/link';
 
 const badgeInfo = {
   "Leonhard Euler": {
@@ -83,22 +85,38 @@ const badgeInfo = {
   },
 };
 
-
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
   const [userName, setUserName] = useState('');
   const [correctExercises, setCorrectExercises] = useState(0);
   const totalExercises = 22;
   const [earnedBadges, setEarnedBadges] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const saveBadgeToDatabase = async (badgeName) => {
+  useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+
+    if (!session) {
+      setLoading(false);
+      return;
+    }
+
+    const userId = session.user.id;
+    console.log('Current userId:', userId);
+    fetchUserData(userId);
+    fetchProgressAndCalculateBadges(userId);
+    fetchEarnedBadges(userId);
+  }, [session, status]);
+
+  const saveBadgeToDatabase = async (badgeName, userId) => {
+    if (!userId) {
+      console.warn('User ID is not set. Cannot save badge.');
+      return;
+    }
+
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const userId = session?.user?.id;
-      if (!userId) return;
-
       const { data: existingBadges, error: fetchError } = await supabase
         .from('user_badges')
         .select('badge_name')
@@ -114,6 +132,7 @@ export default function DashboardPage() {
         const { error: insertError } = await supabase.from('user_badges').insert({
           user_id: userId,
           badge_name: badgeName,
+          earned_at: new Date().toISOString(),
         });
 
         if (insertError) {
@@ -121,157 +140,175 @@ export default function DashboardPage() {
         } else {
           console.log(`Badge "${badgeName}" saved successfully.`);
         }
+      } else {
+        console.log(`Badge "${badgeName}" already exists for user.`);
       }
     } catch (error) {
       console.error(`Error handling badge "${badgeName}":`, error);
     }
   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { data: userProfile, error: profileError } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .single();
+  const fetchEarnedBadges = async (userId) => {
+    if (!userId) {
+      console.warn('User ID is not set. Cannot fetch earned badges.');
+      return;
+    }
 
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          return;
-        }
+    try {
+      const { data: userBadges, error: badgesError } = await supabase
+        .from('user_badges')
+        .select('badge_name')
+        .eq('user_id', userId);
 
-        setUserName(userProfile?.first_name || userProfile?.last_name || 'User');
-      } catch (error) {
-        console.error('Unexpected error fetching user profile:', error);
+      if (badgesError) {
+        console.error('Error fetching earned badges:', badgesError);
+        return;
       }
-    };
 
-    const fetchProgressAndBadges = async () => {
-      try {
-        const { data: userExercises, error: exerciseError } = await supabase
-          .from('user_exercises')
-          .select('question_id, is_correct, exercise_type')
-          .eq('is_correct', true)
-          .in('exercise_type', ['mathematik', 'deutsch']);
-    
-        if (exerciseError) {
-          console.error('Error fetching exercises:', exerciseError);
-          return;
-        }
-    
-        const uniqueCorrectAnswers = userExercises.reduce((unique, exercise) => {
-          if (
-            exercise.is_correct &&
-            !unique.some((item) => item.question_id === exercise.question_id)
-          ) {
-            unique.push(exercise);
-          }
-          return unique;
-        }, []);
-    
-        setCorrectExercises(uniqueCorrectAnswers.length);
+      console.log('Fetched userBadges:', userBadges);
+      setEarnedBadges(userBadges.map((badge) => badge.badge_name));
+    } catch (error) {
+      console.error('Unexpected error fetching badges:', error);
+    }
+  };
 
-        // Badge Logik
-        const mathCompleted =
-          uniqueCorrectAnswers.filter((task) => task.exercise_type === 'mathematik').length === 11;
-        const germanCompleted =
-          uniqueCorrectAnswers.filter((task) => task.exercise_type === 'deutsch').length === 11;
-        const allCompleted = uniqueCorrectAnswers.length === totalExercises;
+  const fetchUserData = async (userId) => {
+    if (!userId) {
+      console.warn('User ID is not set. Cannot fetch user data.');
+      return;
+    }
 
-        // Synonymkenner
-        const synonymQuestionIds = [7, 8, 9, 10, 11];
-        const synonymCorrectAnswers = uniqueCorrectAnswers.filter((task) =>
-          synonymQuestionIds.includes(task.question_id)
-        );
-        const synonymSageCompleted = synonymCorrectAnswers.length === synonymQuestionIds.length;
+    try {
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', userId)
+        .single();
 
-        // Prüfungssicher
-        const examPassed = userExercises.some(
-          (task) => task.exercise_type === 'exam' && task.is_correct
-        );
-
-        // Perfektionistisch
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('first_name, last_name, avatar_url')
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          return;
-        }
-
-        const isProfileComplete =
-          profile?.first_name &&
-          profile?.last_name &&
-          profile?.avatar_url;
-
-        const newBadges = [];
-        if (mathCompleted) {
-          newBadges.push('Leonhard Euler');
-          await saveBadgeToDatabase('Leonhard Euler');
-        }
-        if (germanCompleted) {
-          newBadges.push('Johann Goethe');
-          await saveBadgeToDatabase('Johann Goethe');
-        }
-        if (allCompleted) {
-          newBadges.push('Albert Einstein');
-          await saveBadgeToDatabase('Albert Einstein');
-        }
-        if (
-          mathCompleted &&
-          uniqueCorrectAnswers.filter((task) => task.exercise_type === 'mathematik').length >= 6
-        ) {
-          newBadges.push('Mathegenie');
-          await saveBadgeToDatabase('Mathegenie');
-        }
-        if (
-          germanCompleted &&
-          uniqueCorrectAnswers.filter((task) => task.exercise_type === 'deutsch').length >= 6
-        ) {
-          newBadges.push('Grammatik-Guru');
-          await saveBadgeToDatabase('Grammatik-Guru');
-        }
-        if (synonymSageCompleted) {
-          newBadges.push('Synonymkenner');
-          await saveBadgeToDatabase('Synonymkenner');
-        }
-        if (examPassed) {
-          newBadges.push('Prüfungssicher');
-          await saveBadgeToDatabase('Prüfungssicher');
-        }
-        if (isProfileComplete) {
-          newBadges.push('Perfektionistisch');
-          await saveBadgeToDatabase('Perfektionistisch');
-        }
-        if (newBadges.length >= 5) {
-          newBadges.push('Sammler');
-          await saveBadgeToDatabase('Sammler');
-        }
-
-        setEarnedBadges(newBadges);
-      } catch (error) {
-        console.error('Unexpected error fetching badges:', error);
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        return;
       }
-    };
 
-    fetchUserData();
-    fetchProgressAndBadges();
-  }, []);
+      console.log('Fetched userProfile:', userProfile);
+      const { first_name, last_name } = userProfile || {};
+      setUserName(first_name || last_name || 'User');
+    } catch (error) {
+      console.error('Unexpected error fetching user profile:', error);
+    }
+  };
+
+  const fetchProgressAndCalculateBadges = async (userId) => {
+    if (!userId) {
+      console.warn('User ID is not set. Cannot fetch progress and calculate badges.');
+      return;
+    }
+
+    try {
+      const { data: userExercises, error: exerciseError } = await supabase
+        .from('user_exercises')
+        .select('question_id, is_correct, exercise_type')
+        .eq('is_correct', true)
+        .in('exercise_type', ['mathematik', 'deutsch'])
+        .eq('user_id', userId);
+
+      if (exerciseError) {
+        console.error('Error fetching exercises:', exerciseError);
+        return;
+      }
+
+      console.log('Fetched userExercises:', userExercises);
+
+      const uniqueCorrectAnswers = userExercises.reduce((unique, exercise) => {
+        if (!unique.some((item) => item.question_id === exercise.question_id)) {
+          unique.push(exercise);
+        }
+        return unique;
+      }, []);
+
+      console.log('Unique Correct Exercises:', uniqueCorrectAnswers);
+
+      setCorrectExercises(uniqueCorrectAnswers.length);
+
+      const mathCompleted =
+        uniqueCorrectAnswers.filter((task) => task.exercise_type === 'mathematik').length === 11;
+      const germanCompleted =
+        uniqueCorrectAnswers.filter((task) => task.exercise_type === 'deutsch').length === 11;
+      const allCompleted = uniqueCorrectAnswers.length === totalExercises;
+
+      console.log('Math Completed:', mathCompleted);
+      console.log('German Completed:', germanCompleted);
+      console.log('All Completed:', allCompleted);
+
+      const { data: examResults, error: examError } = await supabase
+        .from('user_exercises')
+        .select('is_correct')
+        .eq('exercise_type', 'exam')
+        .eq('user_id', userId);
+
+      if (examError) {
+        console.error('Error fetching exam results:', examError);
+        return;
+      }
+
+      console.log('Fetched examResults:', examResults);
+
+      const totalExamQuestions = 14;
+      const correctExamAnswers = examResults.filter((result) => result.is_correct).length;
+      const examGrade = (correctExamAnswers / totalExamQuestions) * 5 + 1;
+
+      console.log('Exam Grade:', examGrade);
+
+      const newBadges = [];
+      if (mathCompleted) newBadges.push('Leonhard Euler');
+      if (germanCompleted) newBadges.push('Johann Goethe');
+      if (allCompleted) newBadges.push('Albert Einstein');
+      if (examGrade >= 4.0) newBadges.push('Prüfungssicher');
+
+      console.log('New Badges to Save:', newBadges);
+
+      for (const badge of newBadges) {
+        await saveBadgeToDatabase(badge, userId);
+      }
+
+      fetchEarnedBadges(userId);
+    } catch (error) {
+      console.error('Unexpected error calculating badges:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Laden...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <p className="mb-4">Bitte logge dich ein, um dein Dashboard zu sehen.</p>
+        <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-base font-normal">
+          Zur Anmeldung
+        </Link>
+      </div>
+    );
+  }
 
   const completionPercentage = Math.round((correctExercises / totalExercises) * 100);
 
   return (
     <div className="min-h-screen">
-      {/* Header Bild and Titel */}
+      {/* Header Bild und Titel */}
       <div className="relative w-full h-[400px]">
         <Image
           src="/dashboard.jpeg"
           alt="Dashboard"
           fill={true}
-          objectFit="cover"
-          objectPosition="center"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
           className="rounded-lg"
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
@@ -281,7 +318,7 @@ export default function DashboardPage() {
 
       <div className="container mx-auto p-6 mt-12">
         {/* Begrüssung */}
-        <h2 className="text-3xl font-semibold text-[#003f56] mb-8">Hallo, {userName}</h2>
+        <h2 className="text-3xl font-semibold text-[#003f56] mb-8">Hallo {userName}</h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Fortschrittsanzeige */}
@@ -319,7 +356,7 @@ export default function DashboardPage() {
                       }`}
                     >
                       <Tippy content={badgeInfo[badge].criteria}>
-                        {/* Icon */}
+                        {/* Icons */}
                         <div className="flex items-center justify-center w-12 h-12">
                           {badgeInfo[badge].icon}
                         </div>
