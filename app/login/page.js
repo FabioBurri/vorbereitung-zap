@@ -56,7 +56,7 @@ export default function LoginPage() {
       )}
 
       {/* E-Mail Login */}
-      <form className="flex flex-col w-80 mb-8" onSubmit={handleLogin}>
+      <form className="flex flex-col w-80" onSubmit={handleLogin}>
         <input
           type="email"
           value={email}
@@ -81,38 +81,6 @@ export default function LoginPage() {
           {loading ? 'Anmelden...' : 'Anmelden mit E-Mail'}
         </button>
       </form>
-
-      {/* Login mit Google */}
-      <button 
-        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
-        onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-      >
-        <div className="bg-white p-1 rounded-full mr-2">
-          <Image 
-            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-            alt="Google Logo"
-            width={20}
-            height={20}
-          />
-        </div>
-        Anmelden mit Google
-      </button>
-
-      {/* Login mit GitHub */}
-      <button 
-        className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-4"
-        onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
-      >
-        <div className="bg-white p-1 rounded-full mr-2">
-          <Image 
-            src="https://cdn-icons-png.flaticon.com/512/25/25231.png"
-            alt="Github Logo"
-            width={20}
-            height={20}
-          />
-        </div>
-        Anmelden mit Github
-      </button>
 
       <p className="mt-4">
         Du hast noch keinen Account? Registriere dich{' '}

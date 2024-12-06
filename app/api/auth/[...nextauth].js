@@ -1,7 +1,5 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
 import { SupabaseAdapter } from '@next-auth/supabase-adapter';
 import { supabase } from '../../../lib/supabaseClient';
 
@@ -31,14 +29,6 @@ export default NextAuth({
 
         return { id: data.id, email: data.email, name: data.name };
       }
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
   ],
   adapter: SupabaseAdapter(supabase),

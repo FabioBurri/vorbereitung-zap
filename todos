@@ -1,7 +1,4 @@
 // Gelbe Hinweise in den DevTools lösen
-
-// OAuth Integration in Supabase / Register page braucht ebenfalls OAuth
-// Update Readme
 // Unnötiges löschen
 // Slow loading anschauen
 // CSS Problems ansehen
@@ -11,4 +8,5 @@
 // Mögliche Todos:
 
 // Antworten validieren wie 4 Meter in nummerischen Wert 4 umwandeln, Case sensitivity, leveraging fuzzy to 80%
+// OAuth integrieren
 // Fehler durchgehen
