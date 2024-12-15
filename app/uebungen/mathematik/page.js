@@ -188,14 +188,14 @@ export default function MathematikPage() {
   return (
     <div className="min-h-screen">
       <div className="relative w-full h-[400px]">
-        <Image
-          src="/mathematik.avif"
-          alt="Matkematik"
-          fill={true}
-          objectFit="cover"
-          objectPosition="center"
-          className="rounded-lg"
-        />
+      <Image
+        src="/mathematik.avif"
+        alt="Matkematik"
+        fill
+        style={{ objectFit: 'cover', objectPosition: 'center' }}
+        className="rounded-lg"
+        priority
+      />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg">Übungen Mathematik</h1>
         </div>
@@ -237,10 +237,24 @@ export default function MathematikPage() {
 
                 {/* Bilder für Aufgabe 3 */}
                 {task.id === 17 && (
-                  <Image className="my-6" src="/Aufgabe 3a1.png" alt="Aufgabe 3a1" width={300} height={300} />
+                  <Image
+                  className="my-6"
+                  src="/Aufgabe 3a1.png"
+                  alt="Aufgabe 3a1"
+                  width={300}
+                  height={300}
+                  style={{ width: '300px', height: '300px' }}
+                />
                 )}
                 {task.id === 18 && (
-                  <Image className="my-6" src="/Aufgabe 3a2.png" alt="Aufgabe 3a2" width={300} height={300} />
+                  <Image
+                  className="my-6"
+                  src="/Aufgabe 3a2.png"
+                  alt="Aufgabe 3a2"
+                  width={300}
+                  height={300}
+                  style={{ width: '300px', height: '300px' }}
+                />
                 )}
 
                 {/* Formeln */}

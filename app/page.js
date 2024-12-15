@@ -49,7 +49,7 @@ export default function HomePage() {
           <ul className="space-y-4 mb-14">
             <li className="flex items-start">
               <span className="text-[#003f56] font-bold mr-3">•</span>
-              <span>Ein Lernen, das Spaß macht.</span>
+              <span>Ein Lernen, das Spass macht.</span>
             </li>
             <li className="flex items-start">
               <span className="text-[#003f56] font-bold mr-3">•</span>

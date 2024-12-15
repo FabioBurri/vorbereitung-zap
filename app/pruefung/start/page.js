@@ -110,7 +110,7 @@ export default function ExamPage() {
 
   const handleSubmit = async () => {
     await saveAnswersForTask();
-    router.push('/pruefung/abgabe'); // Navigate to results page
+    router.push('/pruefung/abgabe');
   };
 
   const formatTime = (time) => {
@@ -202,10 +202,22 @@ export default function ExamPage() {
 
           {/* Bilder für Aufgaben 7 und 8 */}
           {tasks[currentTask].task_id === 'task_7' && (
-            <Image src="/Aufgabe 7.png" alt="Aufgabe 7 Bild" width={350} height={210} className="mb-6" />
+            <Image 
+              src="/Aufgabe 7.png" 
+              alt="Aufgabe 7 Bild" 
+              width={350} 
+              height={210} 
+              className="mb-6" 
+            />
           )}
           {tasks[currentTask].task_id === 'task_8' && (
-            <Image src="/Aufgabe 8.png" alt="Aufgabe 8 Bild" width={200} height={120} className="mb-6" />
+            <Image 
+              src="/Aufgabe 8.png" 
+              alt="Aufgabe 8 Bild" 
+              width={200} 
+              height={120} 
+              className="mb-6" 
+            />
           )}
 
           {/* Preistabelle für Aufgabe 2 */}

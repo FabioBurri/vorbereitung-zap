@@ -307,9 +307,10 @@ export default function DashboardPage() {
         <Image
           src="/dashboard.jpeg"
           alt="Dashboard"
-          fill={true}
+          fill
           style={{ objectFit: 'cover', objectPosition: 'center' }}
           className="rounded-lg"
+          priority
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg">Dashboard</h1>

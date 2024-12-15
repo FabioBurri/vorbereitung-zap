@@ -21,10 +21,10 @@ export default function LernmaterialienPage() {
         <Image
           src="/lernmaterialien.jpg"
           alt="Lernmaterialien"
-          fill={true}
-          objectFit="cover"
-          objectPosition="center"
+          fill
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
           className="rounded-lg"
+          priority
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg">Lernmaterialien</h1>

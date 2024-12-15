@@ -24,15 +24,18 @@ const Navbar = () => {
   return (
     <nav className="bg-[#003f56] w-full h-16 p-4 fixed top-0 z-10 flex items-center">
       {/* Logo */}
-      <div className="flex-1">
+      <div className="flex-1 flex items-center">
         <Link href={session ? '/dashboard' : '/'}>
-          <Image 
-            src="/ZAP_logo_transparent.svg"
-            alt="Logo ZAP"
-            width={70}
-            height={50}
-            className="cursor-pointer"
-          />
+          <div className="relative w-20 h-14 cursor-pointer">
+            <Image 
+              src="/ZAP_logo_transparent.svg"
+              alt="Logo ZAP"
+              fill
+              style={{ objectFit: 'contain' }}
+              className="cursor-pointer"
+              priority
+            />
+          </div>
         </Link>
       </div>
 
