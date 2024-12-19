@@ -42,13 +42,25 @@ export default function LernmaterialienPage() {
           <h2 className="text-[#003f56] font-semibold text-2xl mb-4">Mathematik</h2>
           <div className="space-y-4">
             <div className="flex items-center">
-              <img src={pdfIcon} alt="PDF" className="w-6 h-6 mr-2" />
+              <Image
+                src={pdfIcon}
+                alt="PDF Icon"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
               <button onClick={() => handleDownload('/2023_mathematik_aufgaben_lg.pdf', 'Mathematikprüfung 2023.pdf')} className="text-blue-500 underline">
                 Mathematikprüfung 2023
               </button>
             </div>
             <div className="flex items-center">
-              <img src={pdfIcon} alt="PDF" className="w-6 h-6 mr-2" />
+              <Image
+                src={pdfIcon}
+                alt="PDF Icon"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
               <button onClick={() => handleDownload('/2023_mathematik_loesungen_lg.pdf', 'Lösungen Mathematikprüfung 2023.pdf')} className="text-blue-500 underline">
                 Lösungen Mathematikprüfung 2023
               </button>
@@ -61,7 +73,13 @@ export default function LernmaterialienPage() {
           <h2 className="text-[#003f56] font-semibold text-2xl mb-4">Deutsch</h2>
           <div className="space-y-4">
             <div className="flex items-center">
-              <img src={pdfIcon} alt="PDF" className="w-6 h-6 mr-2" />
+              <Image
+                src={pdfIcon}
+                alt="PDF Icon"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
               <button onClick={() => handleDownload('/2023_textblatt_lg.pdf', 'Textblatt 2023.pdf')} className="text-blue-500 underline">
                 Textblatt 2023
               </button>
@@ -73,7 +91,13 @@ export default function LernmaterialienPage() {
               </button>
             </div>
             <div className="flex items-center">
-              <img src={pdfIcon} alt="PDF" className="w-6 h-6 mr-2" />
+              <Image
+                src={pdfIcon}
+                alt="PDF Icon"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
               <button onClick={() => handleDownload('/2023_sprachpruefung_loesung_lg.pdf', 'Lösungen Deutschprüfung 2023.pdf')} className="text-blue-500 underline">
                 Lösungen Deutschprüfung 2023
               </button>
