@@ -32,7 +32,7 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (timer <= 0) {
-      handleSubmit(); // Auto-submit when time runs out
+      handleSubmit();
       return;
     }
     const countdown = setInterval(() => setTimer((prev) => prev - 1), 1000);

@@ -3,11 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -25,7 +23,7 @@ const Navbar = () => {
     <nav className="bg-[#003f56] w-full h-16 p-4 fixed top-0 z-10 flex items-center">
       {/* Logo */}
       <div className="flex-1 flex items-center">
-        <Link href={session ? '/dashboard' : '/'}>
+        <Link href={session ? '/profil' : '/'}>
           <div className="relative w-20 h-14 cursor-pointer">
             <Image 
               src="/ZAP_logo_transparent.svg"

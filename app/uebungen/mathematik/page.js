@@ -118,7 +118,7 @@ export default function MathematikPage() {
           const isCorrect = userAnswers[task.id] === task.solution;
           currentResults[task.id] = isCorrect;
 
-          const { data, error } = await supabase
+          const { data } = await supabase
             .from('user_exercises')
             .select('id')
             .eq('user_id', userId)
@@ -211,7 +211,7 @@ export default function MathematikPage() {
           Antworten jeweils nur die Lösungszahl ein. Zusätze wie km/h oder Franken werden nicht benötigt.
         </p>
 
-        {exercises.uebungen.mathematik.aufgaben.map((aufgabe, aufgabeIndex) => (
+        {exercises.uebungen.mathematik.aufgaben.map((aufgabe) => (
           <div key={aufgabe.id} className="mb-10">
             {/* Titel */}
             <h2 className="text-[#003f56] font-semibold mb-4" style={{ fontSize: '18px' }}>

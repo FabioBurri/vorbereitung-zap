@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [newProfilePic, setNewProfilePic] = useState(null);
+  const [setNewProfilePic] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const defaultProfilePicture = "https://cdn.pixabay.com/photo/2021/07/25/08/03/account-6491185_640.png";
@@ -98,7 +98,7 @@ export default function ProfilePage() {
       } else {
         console.log('Image uploaded successfully:', imageData);
 
-        const { data: updateData, error: updateError } = await supabase
+        const { error: updateError } = await supabase
           .from('profiles')
           .upsert({ id: userId, avatar_url: imageData.path }, { onConflict: 'id' });
 
@@ -134,7 +134,7 @@ export default function ProfilePage() {
       phone: phone,
     };
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .upsert(userData, { onConflict: 'id' });
 

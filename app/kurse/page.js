@@ -122,7 +122,7 @@ export default function KursePage() {
     `;
 
     try {
-      await sendEmail('fabio.burri@hotmail.com', subject, content);
+      await sendEmail(process.env.NEXT_PUBLIC_DEFAULT_RECIPIENT_EMAIL, subject, content);
       setShowSuccessMessage(true);
     } catch (error) {
       setErrorMessage('Fehler beim Versenden der Anmeldung. Bitte versuche es erneut.');

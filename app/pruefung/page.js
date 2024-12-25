@@ -114,7 +114,7 @@ export default function ExamPage() {
               onClick={handleStartExam}
               className="bg-[#003f56] text-white px-6 py-3 rounded hover:bg-[#004f66] transition"
             >
-              Prüfung neustarten
+              Prüfung neu starten
             </button>
           </div>
         )}
