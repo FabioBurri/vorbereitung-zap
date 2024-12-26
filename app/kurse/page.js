@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { sendEmail } from '../lib/sendEmail';
 import { supabase } from '../lib/supabaseClient';
 
 export default function KursePage() {
@@ -122,10 +121,22 @@ export default function KursePage() {
     `;
 
     try {
-      await sendEmail(process.env.NEXT_PUBLIC_DEFAULT_RECIPIENT_EMAIL, subject, content);
+      const response = await fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, content }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Fehler beim Versenden der Anmeldung.');
+      }
+  
       setShowSuccessMessage(true);
+      setSuccessMessage('Anmeldung erfolgreich gesendet!');
     } catch (error) {
-      setErrorMessage('Fehler beim Versenden der Anmeldung. Bitte versuche es erneut.');
+      console.error('Fehler beim Versenden der Anmeldung:', error);
+      setErrorMessage(error.message || 'Fehler beim Versenden der Anmeldung. Bitte versuche es erneut.');
     } finally {
       setIsLoading(false);
     }
