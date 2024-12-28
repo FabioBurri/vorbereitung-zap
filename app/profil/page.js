@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [providerId, setProviderId] = useState('');
   const [setNewProfilePic] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,15 +46,37 @@ export default function ProfilePage() {
             setAvatarUrl(`${publicUrlData.publicUrl}?t=${new Date().getTime()}`);
           }
         } else {
-          setFirstName('');
-          setLastName('');
+          const fullName = session.user.name ?? '';
+          let first = '';
+          let last = '';
+        
+          if (fullName.includes(' ')) {
+            const nameParts = fullName.trim().split(' ');
+            first = nameParts[0] || '';
+            last = nameParts.slice(1).join(' ') || '';
+          } else {
+            const nameParts = fullName.trim().split(/(?=[A-Z])/);
+            
+            if (nameParts.length >= 2) {
+              first = nameParts[0];
+              last = nameParts.slice(1).join(' ');
+            } else {
+              first = fullName;
+              last = '';
+            }
+          }
+        
+          setFirstName(first);
+          setLastName(last);
           setPhone('');
-          setAvatarUrl(defaultProfilePicture);
+          setAvatarUrl(session.user.image ?? defaultProfilePicture);
         }
 
-        if (error && error.code !== 'PGRST116') {
+        if (error && session.user) {
+          setProviderId(session.user.id)
+        } else  {
           console.error('Error fetching profile:', error.message);
-          alert(`Fehler beim Abrufen des Profils: ${error.message}`);
+
         }
         setLoading(false);
       };
