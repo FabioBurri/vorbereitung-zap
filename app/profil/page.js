@@ -27,7 +27,7 @@ export default function ProfilePage() {
     if (userId) {
       const fetchProfile = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('profiles')
           .select('first_name, last_name, phone, avatar_url')
           .eq('id', userId)
@@ -72,12 +72,6 @@ export default function ProfilePage() {
           setAvatarUrl(session.user.image ?? defaultProfilePicture);
         }
 
-        if (error && session.user) {
-          setProviderId(session.user.id)
-        } else  {
-          console.error('Error fetching profile:', error.message);
-
-        }
         setLoading(false);
       };
 
