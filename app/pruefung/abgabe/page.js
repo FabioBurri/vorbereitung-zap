@@ -115,7 +115,7 @@ export default function ResultsPage() {
             onClick={handleRestartExam}
             className="px-4 py-2 bg-[#003f56] text-white rounded hover:bg-[#004f66] transition-colors"
           >
-            Test neustarten
+            Test neu starten
           </button>
         </div>
 

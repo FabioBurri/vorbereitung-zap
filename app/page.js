@@ -65,7 +65,7 @@ export default function HomePage() {
             </li>
             <li className="flex items-start">
               <span className="text-[#003f56] font-bold mr-3">•</span>
-              <span>Sammle Punkte und schalte Belohnungen frei, während du lernst.</span>
+              <span>Verfolge deinen Fortschritt und schalte Abzeichen frei, während du lernst.</span>
             </li>
           </ul>
 

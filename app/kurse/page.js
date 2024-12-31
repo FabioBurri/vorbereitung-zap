@@ -11,6 +11,7 @@ export default function KursePage() {
     vorname: '',
     name: '',
     email: session?.user?.email || '',
+    phone: '',
     courseName: '',
     date: '',
   });
@@ -25,7 +26,7 @@ export default function KursePage() {
       if (session?.user?.id) {
         const { data, error } = await supabase
           .from('profiles')
-          .select('first_name, last_name')
+          .select('first_name, last_name, phone')
           .eq('id', session.user.id)
           .single();
 
@@ -34,6 +35,7 @@ export default function KursePage() {
             ...prevFormData,
             firstname: data.first_name,
             name: data.last_name,
+            phone: data.phone
           }));
         } else if (error) {
           console.error('Error fetching profile data:', error.message);
@@ -112,10 +114,11 @@ export default function KursePage() {
     const subject = `Neue Anmeldung für den Kurs ${formData.courseName}`;
     const content = `
       <h1>Neue Kursanmeldung</h1>
-      <p>Es hat sich eine neue Person für einen Kurs angemeldet. Bitte melden Sie sich so bald wie möglich via E-Mail beim Schüler beziehungsweise bei der Schülerin.</p>
+      <p>Es hat sich eine neue Person für einen Kurs angemeldet. Bitte melden Sie sich [...] so bald wie möglich via E-Mail beim Schüler beziehungsweise bei der Schülerin.</p>
       <p><strong>Vorname:</strong> ${formData.firstname}</p>      
       <p><strong>Name:</strong> ${formData.name}</p>
       <p><strong>E-Mail:</strong> ${formData.email}</p>
+      <p><strong>Telefon:</strong> ${formData.phone}</p>
       <p><strong>Kurs:</strong> ${formData.courseName}</p>
       <p><strong>Datum:</strong> ${formData.date}</p>
     `;
@@ -244,6 +247,19 @@ export default function KursePage() {
                     id="email"
                     name="email"
                     value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full border p-2 rounded"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Telefonnummer</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleChange}
                     required
                     className="mt-1 block w-full border p-2 rounded"

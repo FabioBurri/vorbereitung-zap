@@ -97,16 +97,15 @@ export default function DashboardPage() {
     if (status === 'loading') {
       return;
     }
-
     if (!session) {
       setLoading(false);
       return;
     }
-
     const userId = session.user.id;
     console.log('Current userId:', userId);
+
     fetchUserData(userId);
-    fetchProgressAndCalculateBadges(userId);
+    fetchProgressAndCalculateBadges(userId); 
     fetchEarnedBadges(userId);
   }, [session, status]);
 
@@ -181,7 +180,7 @@ export default function DashboardPage() {
     try {
       const { data: userProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name')
+        .select('first_name, last_name, phone')
         .eq('id', userId)
         .single();
 
@@ -230,11 +229,20 @@ export default function DashboardPage() {
 
       setCorrectExercises(uniqueCorrectAnswers.length);
 
-      const mathCompleted =
-        uniqueCorrectAnswers.filter((task) => task.exercise_type === 'mathematik').length === 11;
-      const germanCompleted =
-        uniqueCorrectAnswers.filter((task) => task.exercise_type === 'deutsch').length === 11;
-      const allCompleted = uniqueCorrectAnswers.length === totalExercises;
+      const mathCorrectCount = uniqueCorrectAnswers.filter(
+        (task) => task.exercise_type === 'mathematik'
+      ).length;
+      const germanCorrectCount = uniqueCorrectAnswers.filter(
+        (task) => task.exercise_type === 'deutsch'
+      ).length;
+
+      const mathCompleted = mathCorrectCount === 11;
+      const germanCompleted = germanCorrectCount === 11;
+
+      const allCompleted = uniqueCorrectAnswers.filter(
+        (task) =>
+          task.exercise_type === 'mathematik' || task.exercise_type === 'deutsch'
+      ).length === totalExercises;
 
       console.log('Math Completed:', mathCompleted);
       console.log('German Completed:', germanCompleted);
@@ -256,14 +264,60 @@ export default function DashboardPage() {
       const totalExamQuestions = 14;
       const correctExamAnswers = examResults.filter((result) => result.is_correct).length;
       const examGrade = (correctExamAnswers / totalExamQuestions) * 5 + 1;
+      const examPassed = examResults.some(result => result.is_correct);
 
       console.log('Exam Grade:', examGrade);
 
+      const synonymQuestionIds = [7, 8, 9, 10, 11];
+      const synonymCorrectAnswers = uniqueCorrectAnswers.filter((task) =>
+        synonymQuestionIds.includes(task.question_id)
+      );
+      const synonymSageCompleted = synonymCorrectAnswers.length === synonymQuestionIds.length;
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone, avatar_url')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+      }
+
+      const isProfileComplete =
+        profile?.first_name && profile?.last_name && profile?.phone && profile?.avatar_url;
+
       const newBadges = [];
-      if (mathCompleted) newBadges.push('Leonhard Euler');
-      if (germanCompleted) newBadges.push('Johann Goethe');
-      if (allCompleted) newBadges.push('Albert Einstein');
-      if (examGrade >= 4.0) newBadges.push('Prüfungssicher');
+
+      if (mathCompleted) {
+        newBadges.push('Leonhard Euler');
+      }
+      if (germanCompleted) {
+        newBadges.push('Johann Goethe');
+      }
+      if (allCompleted) {
+        newBadges.push('Albert Einstein');
+      }
+      if (mathCorrectCount >= 6) {
+        newBadges.push('Mathegenie');
+      }
+      if (germanCorrectCount >= 6) {
+        newBadges.push('Grammatik-Guru');
+      }
+      if (synonymSageCompleted) {
+        newBadges.push('Synonymkenner');
+      }
+      if (examPassed) {
+        newBadges.push('Prüfungssicher');
+      }
+      if (isProfileComplete) {
+        newBadges.push('Perfektionistisch');
+      }
+      const currentBadgesCount = earnedBadges.length;
+      const prospectiveCount = new Set([...earnedBadges, ...newBadges]).size; 
+      if (prospectiveCount >= 5) {
+        newBadges.push('Sammler');
+      }
 
       console.log('New Badges to Save:', newBadges);
 
@@ -272,6 +326,7 @@ export default function DashboardPage() {
       }
 
       fetchEarnedBadges(userId);
+
     } catch (error) {
       console.error('Unexpected error calculating badges:', error);
     } finally {
@@ -291,7 +346,10 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <p className="mb-4">Bitte logge dich ein, um dein Dashboard zu sehen.</p>
-        <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-base font-normal">
+        <Link
+          href="/login"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-base font-normal"
+        >
           Zur Anmeldung
         </Link>
       </div>

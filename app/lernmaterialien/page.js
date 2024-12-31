@@ -108,21 +108,21 @@ export default function LernmaterialienPage() {
         {/* Erklärvideos */}
         <div className="mb-12">
           <h2 className="text-[#003f56] font-semibold text-2xl mb-4">Videos</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="aspect-video">
               <iframe
-                width="560"
-                height="315"
+                width="100%"
+                height="100%"
                 src="https://www.youtube.com/embed/m4BcNMIZj0w"
                 title="YouTube Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
             </div>
-            <div className="mb-6">
+            <div className="aspect-video">
               <iframe
-                width="560"
-                height="315"
+                width="100%"
+                height="100%"
                 src="https://www.youtube.com/embed/2MvyITxrU-g"
                 title="YouTube Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
