@@ -163,70 +163,79 @@ export default function ExamPage() {
 
   return (
     <div className="min-h-screen p-6 pt-20">
-      {/* Timer */}
-      <div className="relative">
-        <div className="absolute top-0 right-0 mt-4">
-          <div className="text-right">
-            <p className="text-black-500">Verbleibende Zeit</p>
-            <p className="text-2xl font-bold text-[#003f56]">{formatTime(timer)}</p>
-          </div>
+      <div className="flex flex-col md:flex-row md:justify-between mb-6 items-start">
+        <div className="flex space-x-4 overflow-x-auto mb-4 md:mb-0 md:mr-6">
+          {tasks.map((task, index) => {
+            const isCurrentTask = currentTask === index;
+            const isAnswered = task.questions.every((q) => answers[q.id]);
+            return (
+              <button
+                key={task.task_id}
+                onClick={async () => {
+                  await saveAnswersForTask();
+                  setCurrentTask(index);
+                }}
+                className={`p-2 rounded ${
+                  isCurrentTask ? 'bg-[#006489] text-white' : ''
+                } ${
+                  isAnswered && !isCurrentTask ? 'bg-[#003f56] text-white' : ''
+                } ${
+                  !isAnswered && !isCurrentTask ? 'bg-gray-200' : ''
+                } hover:bg-[#006489] transition-colors`}
+              >
+                {index + 1}
+              </button>
+            );
+          })}
+        </div>
+  
+        {/* Timer */}
+        <div>
+          <p className="text-black-500">Verbleibende Zeit</p>
+          <p className="text-2xl font-bold text-[#003f56]">{formatTime(timer)}</p>
         </div>
       </div>
-
-      {/* Auflistung der Aufgaben */}
-      <div className="mb-6 flex space-x-4 overflow-x-auto">
-        {tasks.map((task, index) => {
-          const isCurrentTask = currentTask === index;
-          const isAnswered = task.questions.every((q) => answers[q.id]);
-          return (
-            <button
-              key={task.task_id}
-              onClick={async () => {
-                await saveAnswersForTask();
-                setCurrentTask(index);
-              }}
-              className={`p-2 rounded ${isCurrentTask ? 'bg-[#006489] text-white' : ''} ${
-                isAnswered && !isCurrentTask ? 'bg-[#003f56] text-white' : ''
-              } ${!isAnswered && !isCurrentTask ? 'bg-gray-200' : ''} hover:bg-[#006489] transition-colors`}
-            >
-              {index + 1}
-            </button>
-          );
-        })}
-      </div>
-
+  
       {tasks[currentTask] && (
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-[#003f56] mb-6">{tasks[currentTask].title}</h2>
-          <h3 className="text-black font-semibold mb-6">{tasks[currentTask].subtitle}</h3>
-
+          <h2 className="text-xl font-bold text-[#003f56] mb-6">
+            {tasks[currentTask].title}
+          </h2>
+          <h3 className="text-black font-semibold mb-6">
+            {tasks[currentTask].subtitle}
+          </h3>
+  
           {/* Bilder für Aufgaben 7 und 8 */}
           {tasks[currentTask].task_id === 'task_7' && (
-            <Image 
-              src="/Aufgabe 7.png" 
-              alt="Aufgabe 7 Bild" 
-              width={350} 
-              height={210} 
-              className="mb-6" 
+            <Image
+              src="/Aufgabe 7.png"
+              alt="Aufgabe 7 Bild"
+              width={350}
+              height={210}
+              className="mb-6"
             />
           )}
           {tasks[currentTask].task_id === 'task_8' && (
-            <Image 
-              src="/Aufgabe 8.png" 
-              alt="Aufgabe 8 Bild" 
-              width={200} 
-              height={120} 
-              className="mb-6" 
+            <Image
+              src="/Aufgabe 8.png"
+              alt="Aufgabe 8 Bild"
+              width={200}
+              height={120}
+              className="mb-6"
             />
           )}
-
+  
           {/* Preistabelle für Aufgabe 2 */}
           {tasks[currentTask].task_id === 'task_2' && renderPriceTable()}
-
+  
           {tasks[currentTask].questions.map((question) => (
             <div key={question.id} className="mb-6">
               <p className="text-base font-normal mb-2">{question.question}</p>
-              {question.formula && <p className="text-base italic text-black mb-2">{question.formula}</p>}
+              {question.formula && (
+                <p className="text-base italic text-black mb-2">
+                  {question.formula}
+                </p>
+              )}
               <textarea
                 className="w-full p-2 border border-gray-300 rounded"
                 rows="2"
@@ -238,8 +247,8 @@ export default function ExamPage() {
           ))}
         </div>
       )}
-
-      {/* Navigation innerhalb der Aufgaben*/}
+  
+      {/* Navigation innerhalb der Aufgaben */}
       <div className="flex justify-between">
         <div className="w-1/2">
           {currentTask > 0 ? (
@@ -272,5 +281,5 @@ export default function ExamPage() {
         </div>
       </div>
     </div>
-  );
+  );  
 }
